@@ -27,6 +27,11 @@ class TransferExportController extends Controller
         return response()->json($this->exportService->exportSubjects());
     }
 
+    public function classes(): JsonResponse
+    {
+        return response()->json($this->exportService->exportClasses());
+    }
+
     public function teachers(): JsonResponse
     {
         return response()->json($this->exportService->exportTeachers());

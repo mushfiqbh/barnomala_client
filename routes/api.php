@@ -30,6 +30,7 @@ Route::prefix('v1')->group(function () {
     Route::get('students', [TransferExportController::class, 'students']);
     Route::get('student/enrollments', [TransferExportController::class, 'studentEnrollments']);
     Route::get('subjects', [TransferExportController::class, 'subjects']);
+    Route::get('classes', [TransferExportController::class, 'classes']);
     Route::get('teachers', [TransferExportController::class, 'teachers']);
     Route::get('exams', [TransferExportController::class, 'exams']);
     Route::get('exams/schedules', [TransferExportController::class, 'examSchedules']);

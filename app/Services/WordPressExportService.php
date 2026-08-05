@@ -14,6 +14,7 @@ class WordPressExportService
             'students',
             'student/enrollments',
             'subjects',
+            'classes',
             'teachers',
             'exams',
             'exams/schedules',
@@ -31,6 +32,7 @@ class WordPressExportService
             'students' => $this->exportStudents(),
             'student/enrollments' => $this->exportStudentEnrollments(),
             'subjects' => $this->exportSubjects(),
+            'classes' => $this->exportClasses(),
             'teachers' => $this->exportTeachers(),
             'exams' => $this->exportExams(),
             'exams/schedules' => $this->exportExamSchedules(),
@@ -286,6 +288,21 @@ class WordPressExportService
             'SELECT governing_body_id, governing_body_session, governing_body_name, governing_body_image, governing_body_father_name, governing_body_mother_name, governing_body_designation, note, order_number, is_active, created_at, updated_at
              FROM ct_governing_body
              ORDER BY (order_number + 0) ASC'
+        );
+
+        if ($rows === []) {
+            return ['success' => true, 'data' => []];
+        }
+
+        return ['success' => true, 'count' => count($rows), 'data' => $rows];
+    }
+
+    public function exportClasses(): array
+    {
+        $rows = $this->rows(
+            'SELECT classid, className, haveOptionalSub, have4thSub, havecgpa, havegroup, haveShift, combineMark, session, classNote, classOrder
+             FROM ct_class
+             ORDER BY (classOrder + 0) ASC, classid ASC'
         );
 
         if ($rows === []) {

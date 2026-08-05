@@ -197,12 +197,6 @@
                                         </span>
                                     </div>
 
-                                    <div><span class="text-slate-500">Phone:</span>
-                                        <span class="font-semibold text-slate-800">
-                                            {{ $student['phone'] ?? 'N/A' }}
-                                        </span>
-                                    </div>
-
                                     <div>
                                         <span class="text-slate-500">Status:</span>
                                         <span class="ml-1 inline-flex px-2 py-0.5 rounded-full text-xs font-bold
