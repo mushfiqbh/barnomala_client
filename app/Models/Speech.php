@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Speech extends Model
 {
-    protected $fillable = ['name', 'title', 'designation', 'speech', 'image_json', 'row_index', 'column_index', 'colspan', 'is_active'];
+    protected $fillable = ['name', 'title', 'speech', 'image_json', 'row_index', 'column_index', 'colspan', 'is_active'];
 
     protected $casts = [
         'image_json' => 'array',

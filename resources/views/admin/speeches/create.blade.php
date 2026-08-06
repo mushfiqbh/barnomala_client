@@ -31,9 +31,9 @@
                         @error('title') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="designation" class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
-                        <input type="text" name="designation" id="designation" value="{{ old('designation') }}" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" required placeholder="e.g., Barnomala School & College">
-                        @error('designation') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Speaker Name</label>
+                        <input type="text" name="name" id="name" value="{{ old('name') }}" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" placeholder="e.g., Md. Karim Uddin">
+                        @error('name') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
                     </div>
                 </div>                
 
@@ -41,13 +41,7 @@
                     <label for="speech" class="block text-sm font-medium text-gray-700 mb-1">Speech Content</label>
                     <textarea name="speech" id="speech" rows="16" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" required>{{ old('speech') }}</textarea>
                     @error('speech') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
-                </div>
-                
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Speaker Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name') }}" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" required placeholder="e.g., Md. Karim Uddin">
-                    @error('name') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
-                </div>
+                </div>                
 
                 <div class="flex items-center pt-2">
                     <input type="hidden" name="is_active" value="0">

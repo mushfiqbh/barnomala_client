@@ -47,7 +47,6 @@ class SpeechSyncController extends Controller
                 $data = [
                     'name' => $speech['name'] ?? null,
                     'title' => $speech['title'] ?? null,
-                    'designation' => $speech['designation'] ?? null,
                     'speech' => $speech['speech'] ?? null,
                     'image_json' => $speech['image_json'] ?? null,
                     'row_index' => $speech['row_index'] ?? 1,

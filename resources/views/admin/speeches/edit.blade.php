@@ -32,9 +32,9 @@
                         @error('title') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
                     </div>
                     <div>
-                        <label for="designation" class="block text-sm font-medium text-gray-700 mb-1">Designation</label>
-                        <input type="text" name="designation" id="designation" value="{{ old('designation', $speech->designation) }}" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" required>
-                        @error('designation') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
+                        <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Speaker Name</label>
+                        <input type="text" name="name" id="name" value="{{ old('name', $speech->name) }}" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent">
+                        @error('name') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
                     </div>
                 </div>                
 
@@ -42,12 +42,6 @@
                     <label for="speech" class="block text-sm font-medium text-gray-700 mb-1">Speech Content</label>
                     <textarea name="speech" id="speech" rows="16" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" required>{{ old('speech', $speech->speech) }}</textarea>
                     @error('speech') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
-                </div>
-
-                <div>
-                    <label for="name" class="block text-sm font-medium text-gray-700 mb-1">Speaker Name</label>
-                    <input type="text" name="name" id="name" value="{{ old('name', $speech->name) }}" class="w-full px-3 py-1.5 text-sm border border-gray-300 rounded-lg focus:ring-accent focus:border-accent" required>
-                    @error('name') <p class="text-xs text-red-500 mt-0.5">{{ $message }}</p> @enderror
                 </div>
 
                 <div class="flex items-center pt-2">

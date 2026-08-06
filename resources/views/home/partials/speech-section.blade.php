@@ -82,8 +82,9 @@
                                 </div>
 
                                 <div class="text-right pt-4 border-t border-indigo-50 relative z-10">
-                                    <div class="font-black text-indigo-950 text-lg">{{ $speech['name'] ?? $speech->name }}</div>
-                                    {{-- <div class="text-[10px] text-indigo-600 font-black tracking-[0.2em] uppercase mt-1">{{ $speech['designation'] ?? $speech->designation }}</div> --}}
+                                    @if(!empty($speech['name'] ?? $speech->name))
+                                        <div class="font-black text-indigo-950 text-lg">{{ $speech['name'] ?? $speech->name }}</div>
+                                    @endif
                                 </div>
                             </div>
                         </div>

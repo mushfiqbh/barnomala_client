@@ -40,7 +40,9 @@
                         class="relative group cursor-pointer bg-slate-50 rounded-xl border-2 border-dashed border-slate-200 hover:border-indigo-400 hover:bg-indigo-50/30 transition-all p-4 flex flex-col items-center justify-center text-center min-h-50">
                         <img src="{{ $item->image_url }}" alt="" class="w-16 h-16 rounded-full object-cover border-2 border-white shadow-sm mb-3">
                         <h3 class="font-bold text-slate-800 line-clamp-1">{{ $item->title }}</h3>
-                        <p class="text-xs text-slate-500 mt-1">{{ $item->name }}</p>
+                        @if($item->name)
+                            <p class="text-xs text-slate-500 mt-1">{{ $item->name }}</p>
+                        @endif
                         <div class="mt-3">
                             @if($item->is_active)
                                 <span class="inline-flex text-[10px] font-bold uppercase px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full">Active</span>

@@ -49,7 +49,6 @@ class SpeechController extends Controller
         $speech = Speech::create([
             'name' => 'New Speaker',
             'title' => 'Speech Title',
-            'designation' => 'Speaker Designation',
             'speech' => 'Enter speech here...',
             'row_index' => $request->row_index,
             'column_index' => $request->column_index,
@@ -89,9 +88,8 @@ class SpeechController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
-            'designation' => 'required|string|max:255',
             'speech' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',
@@ -136,9 +134,8 @@ class SpeechController extends Controller
     public function update(Request $request, Speech $speech)
     {
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'nullable|string|max:255',
             'title' => 'required|string|max:255',
-            'designation' => 'required|string|max:255',
             'speech' => 'required|string',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
             'is_active' => 'boolean',

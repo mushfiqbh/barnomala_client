@@ -24,8 +24,9 @@
                                 <img src="{{ $speech->image_url }}" alt="{{ $speech->name }}" class="h-full w-full object-cover transition duration-500">
                             </div>
                             <div class="mt-6 text-center lg:text-left">
-                                <h3 class="text-2xl font-black text-slate-950">{{ $speech->name }}</h3>
-                                <p class="mt-1 text-lg font-bold text-accent">{{ $speech->designation }}</p>
+                                @if($speech->name)
+                                    <h3 class="text-2xl font-black text-slate-950">{{ $speech->name }}</h3>
+                                @endif
                             </div>
                         </div>
                         <div class="lg:col-span-2">
