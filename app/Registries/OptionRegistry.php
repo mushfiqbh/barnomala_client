@@ -66,6 +66,11 @@ class OptionRegistry
                         'type' => 'text',
                         'placeholder' => 'Enter institute code',
                     ],
+                    'institute.identity.center_code' => [
+                        'label' => 'Center Code',
+                        'type' => 'text',
+                        'placeholder' => 'Enter center code',
+                    ],
                     'site.visitor_count' => [
                         'label' => 'Visitor Counter (Auto)',
                         'type' => 'number',

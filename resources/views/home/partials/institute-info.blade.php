@@ -13,7 +13,7 @@
             <div class="relative overflow-hidden group bg-linear-to-br p-2 md:p-6 text-white shadow-xl hover:shadow-2xl transition-all duration-500 transform hover:-translate-y-2 {{ $info['colors'] }}">
                 <div class="relative z-10 gap-4">
                     <div class="text-xs font-bold uppercase tracking-wider opacity-80 mb-0.5">{{ $info['label'] }}</div>
-                    <div class="text-sm md:text-2xl font-black tabular-nums">{{ $info['value'] }}</div>
+                    <div class="font-black tabular-nums {{ strlen($info['value']) > 15 ? 'text-[10px] md:text-sm' : 'text-sm md:text-2xl' }}">{{ $info['value'] }}</div>
                 </div>
 
                 <!-- Hover indicator line -->
@@ -21,4 +21,4 @@
             </div>
         @endforeach
     </div>
-</div>
+</div>  

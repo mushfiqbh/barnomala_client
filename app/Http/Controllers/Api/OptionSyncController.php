@@ -53,6 +53,11 @@ class OptionSyncController extends Controller
                 ]);
             }
 
+            // Skip zero-valued institute stats (e.g. student/staff counts of 0)
+            if (str_starts_with($key, 'institute.stats.') && $this->isZeroValue($value)) {
+                continue;
+            }
+
             [$optionValue, $valueType] = $this->serializeOptionValue($value);
 
             $rows[] = [
@@ -85,5 +90,14 @@ class OptionSyncController extends Controller
             $value === null => [null, 'string'],
             default => [(string) $value, 'string'],
         };
+    }
+
+    protected function isZeroValue(mixed $value): bool
+    {
+        if (is_bool($value)) {
+            return $value === false;
+        }
+
+        return is_numeric($value) && (float) $value === 0.0;
     }
 }

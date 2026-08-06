@@ -62,6 +62,7 @@ return [
         'designs'    => [
             'slider-v1' => 'Slider v1 (Default)',
             'slider-v2' => 'Slider v2 (Thumbnail Navigation)',
+            'slider-v3' => 'Slider v3 (Vertical Thumbnails)',
         ],
     ],
 
