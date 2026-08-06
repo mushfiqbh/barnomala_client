@@ -3,7 +3,7 @@
     $footerText = $options['institute.footer.text'] ?? '';
     $address = $options['institute.contact.address'] ?? '';
     $phone = $options['institute.contact.phone'] ?? '01234-567890';
-    $email = $options['institute.contact.email'] ?? 'info@school.edu.bd';
+    $email = $options['institute.contact.email'] ?? 'info@barnomala.com';
     $eiin = $options['institute.identity.eiin'] ?? 'N/A';
     $code = $options['institute.identity.code'] ?? 'N/A';
     $logoUrl = $options['institute.branding.logo_json']['url'] ?? asset('images/school-logo.png');

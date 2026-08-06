@@ -4,7 +4,7 @@
     $bannerUrl = $options['institute.branding.banner_json']['url'] ?? asset('images/default-banner.jpg');
     $phone = $options['institute.contact.phone'] ?? ($options['phone'] ?? '01234-567890');
     $phone2 = $options['institute.contact.phone_extra'] ?? '01700-000000';
-    $email = $options['institute.contact.email'] ?? ($options['email'] ?? 'info@school.edu.bd');
+    $email = $options['institute.contact.email'] ?? ($options['email'] ?? 'info@barnomala.com');
     $address = $options['institute.contact.address'] ?? 'আপনার প্রতিষ্ঠানের ঠিকানা এখানে লিখুন';
     $instituteName = $options['institute.branding.name'] ?? '????? ???????????? ???';
     $eiin = $options['institute.identity.eiin'] ?? ($options['institute.eiin'] ?? '123456');
@@ -111,7 +111,7 @@
     <div class="w-full md:w-[90%] mx-auto px-0 md:px-4 lg:px-8">
         <!-- 1. Only Banner Image -->
         @if ($bannerType === 'banner_only')
-            <div class="relative group overflow-hidden shadow-2xl transition-all duration-500">
+            <div class="relative group overflow-hidden transition-all duration-500">
                 <a href="{{ route('home') }}" class="block">
                     <img src="{{ $bannerUrl }}" 
                          alt="Institute Banner" 

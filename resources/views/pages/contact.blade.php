@@ -6,7 +6,7 @@
 @php
     $instituteName = $options['institute.branding.name'] ?? config('app.name', 'Barnomala');
     $phone = $options['institute.contact.phone'] ?? ($options['phone'] ?? '01234-567890');
-    $email = $options['institute.contact.email'] ?? ($options['email'] ?? 'info@school.edu.bd');
+    $email = $options['institute.contact.email'] ?? ($options['email'] ?? 'info@barnomala.com');
     $address = $options['institute.contact.address'] ?? 'Institute address goes here';
     $mapLink = trim((string) ($options['institute.contact.map_link'] ?? ''));
     $mapEmbedUrl = '';
