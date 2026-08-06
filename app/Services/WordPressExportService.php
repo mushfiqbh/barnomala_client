@@ -300,9 +300,9 @@ class WordPressExportService
     public function exportClasses(): array
     {
         $rows = $this->rows(
-            'SELECT classid, className, haveOptionalSub, have4thSub, havecgpa, havegroup, haveShift, combineMark, session, classNote, classOrder
+            'SELECT classid, className, haveOptionalSub, have4thSub, havecgpa, combineMark, session
              FROM ct_class
-             ORDER BY (classOrder + 0) ASC, classid ASC'
+             ORDER BY classid ASC'
         );
 
         if ($rows === []) {
