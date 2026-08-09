@@ -10,15 +10,9 @@
         <div class="mb-5 print:mb-3">
             <div class="flex items-center justify-between gap-4">
                 <div>
-                    <p class="text-[11px] font-semibold uppercase tracking-[0.28em] text-slate-500">
-                        Student Directory
-                    </p>
                     <h1 class="text-2xl md:text-3xl font-black text-slate-900 mt-1">
                         Student Lookup
                     </h1>
-                    <p class="text-sm text-slate-500 mt-1">
-                        Quick search by class, section, year, roll or student ID
-                    </p>
                 </div>
 
                 <button onclick="window.print()"
@@ -80,7 +74,7 @@
 
                     <!-- Student ID -->
                     <div>
-                        <label class="block text-xs font-semibold text-slate-600 mb-1">Student ID</label>
+                        <label class="block text-xs font-semibold text-slate-600 mb-1">OR Student ID</label>
                         <input type="text" name="student_id" id="student_id"
                             value="{{ $filters['student_id'] ?? '' }}"
                             placeholder="CUST-1001"

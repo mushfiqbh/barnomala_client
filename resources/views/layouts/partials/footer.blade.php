@@ -107,7 +107,7 @@
                 <br/>
                 <h4>Maintained By</h4>
                 <a href="https://barnomala.com" target="_blank">
-                  <img src="{{ asset('images/barnomala-logo.png') }}" alt="Barnomala" style="margin: 0 auto 10px;">
+                  <img src="{{ asset('images/barnomala-logo-new.png') }}" alt="Barnomala" style="margin: 0 auto 10px;">
                 </a>
             </div>
         </div>

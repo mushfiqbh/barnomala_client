@@ -132,11 +132,6 @@ class PageController extends Controller
         return view('student.mobile-banking', $this->getPublicPageData());
     }
 
-    public function results(): View
-    {
-        return view('student.result', $this->getPublicPageData());
-    }
-
     public function teachers(): View
     {
         $teachers = Teacher::where('status', true)

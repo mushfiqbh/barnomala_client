@@ -38,7 +38,7 @@ class StudentController extends Controller
             }
         }
 
-        return view('student.students', array_merge($this->getPublicPageData(), [
+        return view('student.index', array_merge($this->getPublicPageData(), [
             'student' => $student,
             'school' => $school,
             'enrollment' => $enrollment,

@@ -10,6 +10,7 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\NoticeController as AdminNoticeController;
 use App\Http\Controllers\StudentController;
+use App\Http\Controllers\ResultController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\SpeechController as AdminSpeechController;
 use App\Http\Controllers\Admin\OptionController as AdminOptionController;
@@ -87,7 +88,7 @@ Route::get('/student-uniform', [PageController::class, 'uniform'])->name('studen
 Route::get('/daily-activities', [PageController::class, 'activities'])->name('student.activities');
 Route::get('/mobile-banking', [PageController::class, 'mobileBanking'])->name('student.mobile-banking');
 
-Route::get('/result', [PageController::class, 'results'])->name('student.result');
+Route::get('/result', [ResultController::class, 'index'])->name('student.result');
 Route::get('/teachers', [PageController::class, 'teachers'])->name('teachers.index');
 Route::get('/lecturers', [PageController::class, 'lecturers'])->name('lecturers.index');
 Route::get('/former-teachers', [PageController::class, 'formerTeachers'])->name('teachers.former');
