@@ -119,6 +119,186 @@ class ResultController extends Controller
     }
 
     /**
+     * Show a student's result profile — the QR-code entry point that lists
+     * the student's enrollments and their terminal exams.
+     */
+    public function profile(Request $request, $student)
+    {
+        $error = null;
+        $data = $this->fetchStudentProfile($student, $error);
+
+        return view('student.result-profile', array_merge($this->getPublicPageData(), [
+            'student' => $data['student'] ?? null,
+            'school' => $data['school'] ?? null,
+            'enrollments' => $data['enrollments'] ?? [],
+            'error' => $error,
+        ]));
+    }
+
+    /**
+     * Show the subject-wise marksheet for one enrollment + exam, including a
+     * web print URL for the selected exam.
+     */
+    public function marksheet(Request $request, $student)
+    {
+        $error = null;
+        $data = $this->fetchStudentMarksheet($request, $student, $error);
+
+        $exams = $data['exams'] ?? [];
+        $selectedExamId = $data['selected_exam_id'] ?? null;
+        $resultGate = $data['result_gate'] ?? 'unpublished';
+        $result = $data['result'] ?? [];
+        $enrollment = $data['enrollment'] ?? [];
+
+        // Print URL for the selected exam
+        $printUrl = null;
+        foreach ($exams as $exam) {
+            if ((int) ($exam['id'] ?? 0) === (int) $selectedExamId) {
+                $printUrl = $exam['print_url'] ?? null;
+                break;
+            }
+        }
+
+        // Transform subject_results into the shared marksheet partial structure
+        $subjectResults = $data['subject_results'] ?? [];
+        $headKeys = $this->collectSubjectHeadKeys($subjectResults);
+
+        $marksheet = [
+            'image' => null,
+            'name' => $result['exam_name'] ?? 'Marksheet',
+            'roll_no' => $enrollment['roll_no'] ?? null,
+            'class_name' => $enrollment['class_name'] ?? null,
+            'section' => $enrollment['section_name'] ?? null,
+            'group' => $enrollment['group_name'] ?? null,
+            'overall_total' => $result['total_marks'] ?? null,
+            'overall_gpa' => $result['gpa'] ?? null,
+            'overall_grade' => $result['grade'] ?? null,
+            'class_position' => $result['class_position'] ?? null,
+            'section_position' => $result['section_position'] ?? null,
+            'has_fail' => ($result['fail_count'] ?? 0) > 0,
+            'subjects' => $this->buildMarksheetSubjects($subjectResults),
+        ];
+
+        return view('student.result-marksheet', array_merge($this->getPublicPageData(), [
+            'student' => $data['student'] ?? null,
+            'school' => $data['school'] ?? null,
+            'enrollment' => $enrollment,
+            'exams' => $exams,
+            'selected_exam_id' => $selectedExamId,
+            'result_gate' => $resultGate,
+            'result' => $result,
+            'print_url' => $printUrl,
+            'marksheet' => $marksheet,
+            'headKeys' => $headKeys,
+            'error' => $error,
+        ]));
+    }
+
+    /**
+     * Fetch the student result profile from the API.
+     */
+    private function fetchStudentProfile($student, &$error): ?array
+    {
+        try {
+            $response = Http::timeout(15)
+                ->get(self::API_BASE_URL . '/result/' . $student);
+
+            if ($response->successful()) {
+                $data = $response->json('data');
+
+                if (!empty($data['school']['logo'])) {
+                    $data['school']['logo'] = $this->normalizeImageUrl($data['school']['logo']);
+                }
+
+                return $data;
+            }
+
+            $error = $response->status() === 404
+                ? 'Student not found.'
+                : ($response->json('message') ?? 'Unable to load results. Please try again later.');
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Result Profile Error: ' . $e->getMessage());
+            $error = 'Unable to retrieve results. Please try again later.';
+
+            return null;
+        }
+    }
+
+    /**
+     * Fetch the student marksheet from the API.
+     */
+    private function fetchStudentMarksheet(Request $request, $student, &$error): ?array
+    {
+        try {
+            $params = ['enrollment_id' => $request->input('enrollment_id')];
+
+            if ($request->filled('exam_id')) {
+                $params['exam_id'] = $request->input('exam_id');
+            }
+
+            $response = Http::timeout(15)
+                ->get(self::API_BASE_URL . '/result/' . $student . '/marksheet', $params);
+
+            if ($response->successful()) {
+                return $response->json('data');
+            }
+
+            $error = $response->json('message') ?? 'Unable to load the marksheet.';
+
+            return null;
+        } catch (\Exception $e) {
+            Log::error('Result Marksheet Error: ' . $e->getMessage());
+            $error = 'Unable to retrieve the marksheet. Please try again later.';
+
+            return null;
+        }
+    }
+
+    /**
+     * Collect the union of dynamic mark heads (cq, mcq, practical, viva, ...)
+     * across subject results so one column per head can be rendered.
+     */
+    private function collectSubjectHeadKeys(array $subjectResults): array
+    {
+        $heads = [];
+
+        foreach ($subjectResults as $subject) {
+            foreach (($subject['marks'] ?? []) as $key => $value) {
+                if (!in_array($key, $heads, true)) {
+                    $heads[] = $key;
+                }
+            }
+        }
+
+        return $heads;
+    }
+
+    /**
+     * Map API subject results onto the shared marksheet partial structure,
+     * merging the dynamic marks object into each subject row.
+     */
+    private function buildMarksheetSubjects(array $subjectResults): array
+    {
+        $subjects = [];
+
+        foreach ($subjectResults as $subject) {
+            $subjects[] = array_merge([
+                'subject_name' => $subject['subject_name'] ?? 'N/A',
+                'grade' => $subject['grade'] ?? null,
+                'gpa' => $subject['gpa'] ?? null,
+                'is_fourth' => !empty($subject['is_fourth']),
+                'is_combined' => !empty($subject['is_combined']),
+                'is_absent' => !empty($subject['is_absent']),
+                'total' => $subject['total_mark'] ?? 0,
+            ], $subject['marks'] ?? []);
+        }
+
+        return $subjects;
+    }
+
+    /**
      * Fetch class / section / year filter options from the API.
      */
     private function fetchFilterOptions(): array

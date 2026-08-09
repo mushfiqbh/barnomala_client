@@ -89,6 +89,17 @@ Route::get('/daily-activities', [PageController::class, 'activities'])->name('st
 Route::get('/mobile-banking', [PageController::class, 'mobileBanking'])->name('student.mobile-banking');
 
 Route::get('/result', [ResultController::class, 'index'])->name('student.result');
+
+// QR-code entry point: student result profile (enrollment cards + exams)
+Route::get('/result/{student}', [ResultController::class, 'profile'])
+    ->where('student', '[0-9]+')
+    ->name('student.result.profile');
+
+// Subject-wise marksheet for one enrollment + exam, with a web print URL
+Route::get('/result/{student}/marksheet', [ResultController::class, 'marksheet'])
+    ->where('student', '[0-9]+')
+    ->name('student.result.marksheet');
+
 Route::get('/teachers', [PageController::class, 'teachers'])->name('teachers.index');
 Route::get('/lecturers', [PageController::class, 'lecturers'])->name('lecturers.index');
 Route::get('/former-teachers', [PageController::class, 'formerTeachers'])->name('teachers.former');

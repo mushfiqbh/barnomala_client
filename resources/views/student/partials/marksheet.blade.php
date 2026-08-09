@@ -11,7 +11,7 @@
             <img src="{{ $ms['image'] }}" alt="{{ $ms['name'] ?? '' }}"
                 class="w-12 h-12 rounded-lg object-cover border border-slate-200">
         @endif
-        <div class="flex-1 min-w-[220px]">
+        <div class="flex-1 min-w-55">
             <p class="font-bold text-slate-900 text-sm">{{ $ms['name'] ?? 'N/A' }}</p>
             <p class="text-xs text-slate-500">
                 Roll: <span class="font-semibold text-slate-700">{{ $ms['roll_no'] ?? '—' }}</span>
@@ -40,31 +40,31 @@
     @if(($ms['overall_total'] ?? null) !== null || ($ms['overall_gpa'] ?? null) !== null)
         <div class="flex flex-wrap gap-3 px-4 py-3 bg-slate-50/70 border-t border-slate-200">
             @if(($ms['overall_total'] ?? null) !== null)
-                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-[90px]">
+                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-22.5">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Total</p>
                     <p class="font-black text-slate-900 text-sm">{{ $ms['overall_total'] }}</p>
                 </div>
             @endif
             @if(($ms['overall_gpa'] ?? null) !== null)
-                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-[90px]">
+                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-22.5">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">GPA</p>
                     <p class="font-black text-slate-900 text-sm">{{ number_format((float) $ms['overall_gpa'], 2) }}</p>
                 </div>
             @endif
             @if(($ms['overall_gpa_without_fourth'] ?? null) !== null)
-                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-[110px]">
+                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-27.5">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">GPA (w/o 4th)</p>
                     <p class="font-black text-slate-900 text-sm">{{ number_format((float) $ms['overall_gpa_without_fourth'], 2) }}</p>
                 </div>
             @endif
             @if(!empty($ms['overall_grade']))
-                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-[90px]">
+                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-22.5">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Grade</p>
                     <p class="font-black text-slate-900 text-sm">{{ $ms['overall_grade'] }}</p>
                 </div>
             @endif
             @if(($ms['class_position'] ?? null) !== null || ($ms['section_position'] ?? null) !== null)
-                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-[130px]">
+                <div class="rounded-lg bg-white border border-slate-200 px-3 py-2 min-w-32.5">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-slate-400">Position</p>
                     <p class="font-black text-slate-900 text-sm">
                         Class #{{ $ms['class_position'] ?? '—' }} · Section #{{ $ms['section_position'] ?? '—' }}
@@ -72,7 +72,7 @@
                 </div>
             @endif
             @if(!empty($ms['has_fail']))
-                <div class="rounded-lg bg-red-50 border border-red-200 px-3 py-2 min-w-[90px]">
+                <div class="rounded-lg bg-red-50 border border-red-200 px-3 py-2 min-w-22.5">
                     <p class="text-[10px] font-bold uppercase tracking-wide text-red-400">Result</p>
                     <p class="font-black text-red-600 text-sm">Failed</p>
                 </div>
