@@ -7,6 +7,7 @@ use App\Http\Controllers\HomeController;
 use App\Http\Controllers\NoticeController;
 use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PageController;
+use App\Http\Controllers\ApplyController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Admin\NoticeController as AdminNoticeController;
 use App\Http\Controllers\StudentController;
@@ -113,8 +114,13 @@ Route::get('/committees', [PageController::class, 'committees'])->name('committe
 Route::get('/committees/{committee}', [PageController::class, 'committeeDetail'])->name('committees.show');
 
 Route::get('/contact-us', [PageController::class, 'contact'])->name('contact.index');
-Route::get('/apply', [PageController::class, 'apply'])->name('apply.index');
-Route::post('/apply', [PageController::class, 'applySubmit'])->name('apply.submit');
+Route::get('/apply', [ApplyController::class, 'apply'])->name('apply.index');
+Route::get('/apply/new', [ApplyController::class, 'applyNew'])->name('apply.new');
+Route::get('/apply/applications', [ApplyController::class, 'applyApplications'])->name('apply.applications');
+Route::get('/apply/slip', [ApplyController::class, 'printSlip'])->name('apply.slip');
+Route::get('/apply/payment', [ApplyController::class, 'applyPayment'])->name('apply.payment');
+Route::get('/apply/support', [ApplyController::class, 'applySupport'])->name('apply.support');
+Route::post('/apply', [ApplyController::class, 'applySubmit'])->name('apply.submit');
 Route::post('/contact-us', [PageController::class, 'contactSubmit'])->name('contact.submit');
 
 Route::prefix('notices')->name('notices.')->group(function () {

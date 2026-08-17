@@ -89,7 +89,7 @@
                 <h4>Quick Links</h4>
                 <ul>
                     <li><a href="/notices">Notice Board</a></li>
-                    <li><a href="/admission">Online Admission</a></li>
+                    <li><a href="{{ route('apply.index') }}">Online Admission</a></li>
                     <li><a href="/teachers">Our Teachers</a></li>
                     <li><a href="/gallery">Photo Gallery</a></li>
                     <li><a href="/contact-us">Contact Us</a></li>
