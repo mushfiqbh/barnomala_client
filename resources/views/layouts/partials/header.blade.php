@@ -1,7 +1,45 @@
 @php
     $theme = $theme ?? app(\App\Services\ThemeService::class);
     $bannerType = $theme->currentValue('banner_type');
-    $bannerUrl = $options['institute.branding.banner_json']['url'] ?? asset('images/default-banner.jpg');
+
+    // Options values for json-typed keys may already be decoded to arrays (when
+    // they come through Option::value), or remain JSON strings. This helper
+    // normalizes either case.
+    $decodeJson = function ($raw) {
+        if (is_array($raw)) {
+            return $raw;
+        }
+        if (is_string($raw) && $raw !== '') {
+            $decoded = json_decode($raw, true);
+            if (is_array($decoded)) {
+                return $decoded;
+            }
+        }
+        return [];
+    };
+
+    // Resolve active banner: prefer the multi-banner library, fall back to the
+    // legacy single banner_json, then to a default placeholder.
+    $bannerUrl = asset('images/default-banner.jpg');
+    $bannersLibrary = $decodeJson($options['institute.branding.banners_json'] ?? null);
+    $legacyBanner   = $decodeJson($options['institute.branding.banner_json']    ?? null);
+    $activeBannerId = $options['institute.branding.active_banner_id'] ?? null;
+
+    if (!empty($bannersLibrary)) {
+        if ($activeBannerId) {
+            foreach ($bannersLibrary as $b) {
+                if (isset($b['id']) && (string) $b['id'] === (string) $activeBannerId && !empty($b['url'])) {
+                    $bannerUrl = $b['url'];
+                    break;
+                }
+            }
+        }
+        if ($bannerUrl === asset('images/default-banner.jpg') && !empty($bannersLibrary[0]['url'])) {
+            $bannerUrl = $bannersLibrary[0]['url'];
+        }
+    } elseif (!empty($legacyBanner['url'])) {
+        $bannerUrl = $legacyBanner['url'];
+    }
     $phone = $options['institute.contact.phone'] ?? ($options['phone'] ?? '01234-567890');
     $phone2 = $options['institute.contact.phone_extra'] ?? '01700-000000';
     $email = $options['institute.contact.email'] ?? ($options['email'] ?? 'info@barnomala.com');

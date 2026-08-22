@@ -108,6 +108,8 @@
                             $isFourth = !empty($subject['is_fourth']);
                             $isAbsent = !empty($subject['is_absent']);
                             $isCombined = !empty($subject['is_combined']);
+                            $paperType = $subject['connection_type'] ?? null;
+                            $parentSubjectId = $subject['parent_subject_id'] ?? null;
                             $hasIncourse = !empty($subject['has_incourse']);
                             $subjectTotal = $subject['total'] ?? ($subject['total_mark'] ?? 0);
                             $subjectGpa = $subject['gpa'] ?? null;
@@ -128,9 +130,6 @@
                                         @if($isFourth)
                                             <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold bg-indigo-100 text-indigo-700">4th</span>
                                         @endif
-                                        @if($isCombined)
-                                            <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold bg-slate-200 text-slate-600">Combined</span>
-                                        @endif
                                         @if($isAbsent)
                                             <span class="inline-flex px-1.5 py-0.5 rounded text-[10px] font-bold bg-red-100 text-red-700">Absent</span>
                                         @endif
@@ -150,12 +149,21 @@
                             <td class="px-3 py-2.5 text-center font-bold text-slate-900 whitespace-nowrap">
                                 {{ number_format((float) $subjectTotal, 0) }}
                             </td>
-                            <td class="px-3 py-2.5 text-center font-semibold text-slate-700">
-                                {{ $subject['grade'] ?? '—' }}
-                            </td>
-                            <td class="px-3 py-2.5 text-center font-semibold text-slate-700 whitespace-nowrap">
-                                {{ $subjectGpa !== null ? number_format((float) $subjectGpa, 2) : '—' }}
-                            </td>
+                            @if($isCombined && $paperType === 'first_paper')
+                                <td class="px-3 py-2.5 text-center font-semibold text-slate-700 whitespace-nowrap">
+                                    -
+                                </td>
+                                <td class="px-3 py-2.5 text-center font-semibold text-slate-700 whitespace-nowrap">
+                                    -
+                                </td>
+                            @else
+                                <td class="px-3 py-2.5 text-center font-semibold text-slate-700">
+                                    {{ $subject['grade'] ?? '—' }}
+                                </td>
+                                <td class="px-3 py-2.5 text-center font-semibold text-slate-700 whitespace-nowrap">
+                                    {{ $subjectGpa !== null ? number_format((float) $subjectGpa, 2) : '—' }}
+                                </td>
+                            @endif
                         </tr>
                     @endforeach
                 </tbody>

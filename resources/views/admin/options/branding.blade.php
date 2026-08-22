@@ -40,18 +40,42 @@
             {{-- Tab 1: Branding & Visuals --}}
             <div x-show="activeTab === 'branding'" class="p-6 md:p-8">
                 @php
-                    $logo = json_decode($options['institute.branding.logo_json'] ?? '{}', true);
-                    $bannerData = json_decode($options['institute.branding.banner_json'] ?? '{}', true);
+                    $decodeJson = function ($raw) {
+                        if (is_array($raw)) return $raw;
+                        if (is_string($raw) && $raw !== '') {
+                            $d = json_decode($raw, true);
+                            if (is_array($d)) return $d;
+                        }
+                        return [];
+                    };
+
+                    $logo = $decodeJson($options['institute.branding.logo_json'] ?? null) ?: [];
+
+                    // Resolve the banner library with legacy fallback.
+                    $bannersLibrary = $decodeJson($options['institute.branding.banners_json'] ?? null);
+                    if (empty($bannersLibrary)) {
+                        $legacy = $decodeJson($options['institute.branding.banner_json'] ?? null);
+                        if (!empty($legacy['path'])) {
+                            $bannersLibrary = [[
+                                'id'    => 'legacy',
+                                'url'   => $legacy['url'] ?? '',
+                                'path'  => $legacy['path'],
+                            ]];
+                        } else {
+                            $bannersLibrary = [];
+                        }
+                    }
+                    $activeBannerId = $options['institute.branding.active_banner_id'] ?? null;
+                    if (!$activeBannerId && !empty($bannersLibrary)) {
+                        $activeBannerId = $bannersLibrary[0]['id'];
+                    }
                 @endphp
 
-                {{-- Logo & Banner --}}
-                <div x-data="{
-                    bannerPreview: '{{ $bannerData['url'] ?? '' }}',
-                    handleBannerChange(e) {
-                        const file = e.target.files[0];
-                        if (file) this.bannerPreview = URL.createObjectURL(file);
-                    }
-                }">
+                {{-- Logo & Banners --}}
+                <div x-data='bannerManager({
+                    banners: @json($bannersLibrary),
+                    activeId: @json((string) $activeBannerId)
+                })'>
                     <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
                         {{-- Logo (3 cols) --}}
                         <div class="md:col-span-3 space-y-3">
@@ -84,35 +108,168 @@
                             </div>
                         </div>
 
-                        {{-- Banner (9 cols) --}}
-                        <div class="md:col-span-9 space-y-3">
-                            <label class="block text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Main Banner</label>
-                            <div class="relative group min-h-44 w-full bg-linear-to-br from-slate-100 to-slate-200 dark:from-slate-700 dark:to-slate-600 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl overflow-hidden flex items-center justify-center transition-all duration-300 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-lg">
-                                <template x-if="bannerPreview">
-                                    <img :src="bannerPreview" class="w-full h-full object-cover">
-                                </template>
-                                <template x-if="!bannerPreview">
-                                    <div class="text-center p-4">
-                                        <div class="w-12 h-12 rounded-xl bg-slate-200 dark:bg-slate-600 flex items-center justify-center mx-auto mb-2">
-                                            <i class="fas fa-mountain text-slate-400 dark:text-slate-500 text-lg"></i>
+                        {{-- Banners (9 cols) --}}
+                        <div class="md:col-span-9 space-y-4">
+                            <div class="flex items-center justify-between gap-3">
+                                <label class="block text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest">Site Banners</label>
+                                <span class="text-[10px] font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                                    Pick which one shows on the live site
+                                </span>
+                            </div>
+
+                            <input type="hidden" name="active_banner_id" :value="activeId">
+
+                            {{-- Existing banners grid --}}
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                                <template x-for="(banner, index) in banners" :key="banner.id">
+                                    <div class="group relative bg-white dark:bg-slate-800 rounded-2xl shadow-xs border border-slate-200 dark:border-slate-700 overflow-hidden transition-all duration-300 hover:shadow-lg"
+                                        :class="banner.removed ? 'opacity-50' : ''"
+                                        x-show="!banner.removed">
+                                        <div class="relative aspect-video bg-slate-100 dark:bg-slate-700 overflow-hidden">
+                                            <img :src="banner.preview || banner.url"
+                                                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105">
+
+                                            {{-- Active ribbon --}}
+                                            <div class="absolute top-2 left-2 flex gap-2">
+                                                <span x-show="activeId === banner.id"
+                                                    class="bg-emerald-500 text-white px-2 py-1 rounded-lg text-[10px] font-black uppercase tracking-widest shadow-sm flex items-center gap-1">
+                                                    <i class="fas fa-check-circle"></i> Active
+                                                </span>
+                                                <span x-show="banner.isNew"
+                                                    class="bg-indigo-600 text-white px-2 py-1 rounded-lg text-[10px] font-bold uppercase tracking-wider shadow-sm">
+                                                    New
+                                                </span>
+                                            </div>
+
+                                            {{-- Hover actions --}}
+                                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-3">
+                                                <label class="cursor-pointer bg-white/90 hover:bg-white text-slate-900 w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+                                                    title="Replace image">
+                                                    <i class="fas fa-camera text-sm"></i>
+                                                    <input type="file" :name="`existing_banners[${banner.id}][image]`"
+                                                        @change="handleReplace($event, index)" class="hidden">
+                                                </label>
+                                                <button type="button" @click="markRemoved(index)"
+                                                    class="bg-red-500/90 hover:bg-red-600 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-lg transition-transform hover:scale-110"
+                                                    title="Delete banner">
+                                                    <i class="fas fa-trash-alt text-sm"></i>
+                                                </button>
+                                            </div>
                                         </div>
-                                        <p class="text-slate-500 dark:text-slate-400 text-sm font-medium">No Banner Set</p>
-                                        <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Upload a banner image for your site header</p>
+
+                                        <div class="p-3 space-y-2.5 bg-gray-200">
+                                            <input type="hidden" :name="`existing_banners[${banner.id}][delete]`" :value="banner.removed ? '1' : '0'">
+                                            <input type="hidden" :name="`existing_banners[${banner.id}][url]`" :value="banner.url">
+                                            <input type="hidden" :name="`existing_banners[${banner.id}][path]`" :value="banner.path">
+
+                                            <label class="flex items-center gap-2 cursor-pointer select-none">
+                                                <input type="radio" name="active_banner_radio" :value="banner.id"
+                                                    @change="setActive(banner.id)"
+                                                    :checked="activeId === banner.id"
+                                                    class="w-4 h-4 text-emerald-500 border-slate-300 focus:ring-emerald-500 cursor-pointer">
+                                                <span class="text-xs font-bold text-slate-600 dark:text-slate-300">Set as active banner</span>
+                                            </label>
+                                        </div>
                                     </div>
                                 </template>
-                                <label class="absolute inset-0 bg-linear-to-t from-indigo-900/80 to-purple-900/60 opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center cursor-pointer backdrop-blur-sm">
-                                    <div class="text-center transform translate-y-4 group-hover:translate-y-0 transition-transform duration-300">
-                                        <i class="fas fa-cloud-upload-alt text-3xl text-white mb-2"></i>
-                                        <p class="text-white text-sm font-bold">Update Banner Image</p>
-                                        <p class="text-white/70 text-[10px] mt-1">Click to upload</p>
+
+                                {{-- Add new banner card --}}
+                                <label class="group relative flex flex-col items-center justify-center min-h-[180px] bg-slate-50 dark:bg-slate-700/30 border-2 border-dashed border-slate-200 dark:border-slate-600 rounded-2xl cursor-pointer transition-all duration-300 hover:bg-indigo-50 dark:hover:bg-slate-700 hover:border-indigo-300 dark:hover:border-indigo-500 hover:shadow-md active:scale-[0.98]">
+                                    <input type="file" name="banners[]" accept="image/*" multiple
+                                        @change="handleNewUpload($event)" class="hidden">
+                                    <div class="w-14 h-14 bg-white dark:bg-slate-800 rounded-full flex items-center justify-center shadow-sm border border-slate-100 dark:border-slate-600 group-hover:border-indigo-100 group-hover:scale-110 transition-transform mb-3">
+                                        <i class="fas fa-plus text-slate-400 group-hover:text-indigo-600 text-xl"></i>
                                     </div>
-                                    <input type="file" name="banner" class="hidden" accept="image/*"
-                                        @change="handleBannerChange">
+                                    <span class="text-xs font-black text-slate-500 dark:text-slate-400 group-hover:text-indigo-600 uppercase tracking-widest">Add Banner</span>
+                                    <span class="text-[10px] text-slate-400 dark:text-slate-500 mt-1">You can upload several at once</span>
                                 </label>
+
+                                {{-- Hidden stash for new banners so the actual File objects ride along on submit --}}
+                                <template x-for="banner in banners.filter(b => b.isNew && !b.removed)" :key="'stash-' + banner.id">
+                                    <input type="file" :name="`new_banners[${banner.id}]`" class="hidden"
+                                        x-effect="banner.file ? (() => { const dt = new DataTransfer(); dt.items.add(banner.file); $el.files = dt.files; })() : null">
+                                </template>
+                            </div>
+
+                            {{-- Empty state --}}
+                            <div x-show="banners.filter(b => !b.removed).length === 0"
+                                class="py-10 bg-slate-50/50 dark:bg-slate-700/30 rounded-2xl border-4 border-dashed border-slate-100 dark:border-slate-600 text-center">
+                                <div class="w-14 h-14 bg-white dark:bg-slate-800 rounded-2xl flex items-center justify-center shadow-sm mx-auto mb-3">
+                                    <i class="fas fa-image text-slate-300 dark:text-slate-500 text-xl"></i>
+                                </div>
+                                <p class="text-sm text-slate-600 dark:text-slate-300 font-bold">No banners yet</p>
+                                <p class="text-xs text-slate-400 dark:text-slate-500 mt-1">Upload one or more to populate your header.</p>
                             </div>
                         </div>
                     </div>
                 </div>
+
+                {{-- Inline Alpine component for the multi-banner manager --}}
+                <script>
+                    function bannerManager(initial) {
+                        return {
+                            banners: (initial.banners || []).map(b => Object.assign({}, b, {
+                                preview: null,
+                                removed: false,
+                                isNew: false,
+                            })),
+                            activeId: initial.activeId || null,
+                            setActive(id) {
+                                this.activeId = id;
+                            },
+                            markRemoved(index) {
+                                if (this.banners[index].isNew) {
+                                    // Brand-new (unsaved) banners can just be dropped locally.
+                                    this.banners.splice(index, 1);
+                                    if (!this.banners.find(b => b.id === this.activeId)) {
+                                        this.activeId = this.banners[0]?.id || null;
+                                    }
+                                    return;
+                                }
+                                this.banners[index].removed = true;
+                                if (this.activeId === this.banners[index].id) {
+                                    const remaining = this.banners.find(b => !b.removed);
+                                    this.activeId = remaining ? remaining.id : null;
+                                }
+                            },
+                            handleReplace(event, index) {
+                                const file = event.target.files[0];
+                                if (!file) return;
+                                const reader = new FileReader();
+                                reader.onload = (e) => { this.banners[index].preview = e.target.result; };
+                                reader.readAsDataURL(file);
+                            },
+                            handleNewUpload(event) {
+                                const files = Array.from(event.target.files || []);
+                                if (!files.length) return;
+                                const readerFor = (file) => new Promise(resolve => {
+                                    const r = new FileReader();
+                                    r.onload = e => resolve(e.target.result);
+                                    r.readAsDataURL(file);
+                                });
+                                Promise.all(files.map(readerFor)).then(previews => {
+                                    files.forEach((file, i) => {
+                                        const id = 'new_' + Date.now() + '_' + Math.random().toString(36).slice(2, 8) + '_' + i;
+                                        this.banners.push({
+                                            id: id,
+                                            url: '',
+                                            path: '',
+                                            preview: previews[i],
+                                            removed: false,
+                                            isNew: true,
+                                            file: file,
+                                        });
+                                    });
+                                    // Reset the picker so the same files can be re-selected later if removed.
+                                    event.target.value = '';
+                                    if (!this.activeId) {
+                                        this.activeId = this.banners[this.banners.length - 1].id;
+                                    }
+                                });
+                            },
+                        };
+                    }
+                </script>
 
                 {{-- Colors & About Image --}}
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mt-16">
@@ -169,8 +326,9 @@
                     {{-- About Image --}}
                     <div class="bg-slate-50/50 dark:bg-slate-700/30 rounded-xl p-5 border border-slate-100 dark:border-slate-600">
                         @php
-                            $aboutImage = json_decode($options['institute.about.image_json'] ?? '{}', true);
-                        @endphp
+                            $aboutImageRaw = $options['institute.about.image_json'] ?? null;
+                            $aboutImage = is_array($aboutImageRaw) ? $aboutImageRaw : (is_string($aboutImageRaw) && $aboutImageRaw !== '' ? (json_decode($aboutImageRaw, true) ?: []) : []);
+                        @endphp>
                         <label class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest mb-4 flex items-center gap-2">
                             <i class="fas fa-image text-indigo-500"></i>
                             About Image

@@ -10,10 +10,10 @@
 
 @section('content')
 <section class="py-6 print:py-0 bg-slate-50 print:bg-white min-h-screen">
-    <div class="mx-auto max-w-[90%] sm:px-6 lg:px-8 print:px-0">
+    <div class="w-full md:max-w-5xl mx-auto sm:px-6 lg:px-8 print:px-0">
 
         <!-- Header -->
-        <div class="mb-5 print:mb-3">
+        <div class="mb-5 print:mb-3 mx-4 md:mx-0">
             <div class="flex items-center justify-between gap-4">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-black text-slate-900 mt-1">
@@ -24,7 +24,7 @@
         </div>
 
         <!-- Search Panel -->
-        <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm print:hidden">
+        <div class="bg-white border border-slate-50 rounded-2xl p-4 mx-4 md:mx-0 shadow-sm print:hidden">
 
             <form action="{{ route('student.result') }}" method="GET">
 
@@ -147,7 +147,7 @@
         <!-- Results -->
         @if($student)
             <!-- Exams -->
-            <div class="w-full md:w-2/3 mx-auto mt-5 space-y-4">
+            <div class="w-full mt-5 space-y-4">
                 @forelse($exams as $exam)
                     @php
                         $isUnpublished = ($exam['status'] ?? '') === 'unpublished';

@@ -382,6 +382,71 @@ class OptionController extends Controller
     }
 
     /**
+     * Resolve the current banner library.
+     *
+     * Reads from the new `institute.branding.banners_json` (array of banners)
+     * and falls back to the legacy single `institute.branding.banner_json`
+     * so existing sites migrate transparently.
+     *
+     * @return array<int, array{id:string,url:string,path:string,label:string}>
+     */
+    protected function getBanners(): array
+    {
+        $option = Option::where('option_key', 'institute.branding.banners_json')->first();
+        $banners = [];
+
+        if ($option) {
+            $decoded = json_decode($option->option_value, true);
+            if (is_array($decoded)) {
+                $banners = array_values(array_filter($decoded, fn($b) => is_array($b) && !empty($b['path'])));
+            }
+        }
+
+        if (empty($banners)) {
+            $legacy = Option::where('option_key', 'institute.branding.banner_json')->first();
+            if ($legacy) {
+                $decoded = json_decode($legacy->option_value, true);
+                if (is_array($decoded) && !empty($decoded['path'])) {
+                    $banners[] = [
+                        'id'    => 'legacy',
+                        'url'   => $decoded['url'] ?? Storage::url($decoded['path']),
+                        'path'  => $decoded['path'],
+                        'label' => 'Default Banner',
+                    ];
+                }
+            }
+        }
+
+        return $banners;
+    }
+
+    /**
+     * Persist the banner library (filtered, with assigned ids).
+     */
+    protected function saveBanners(array $banners): void
+    {
+        $clean = [];
+        foreach ($banners as $b) {
+            if (!is_array($b) || empty($b['path'])) {
+                continue;
+            }
+            $clean[] = [
+                'id'    => (string) ($b['id'] ?? \Illuminate\Support\Str::uuid()),
+                'url'   => (string) ($b['url'] ?? Storage::url($b['path'])),
+                'path'  => (string) $b['path'],
+            ];
+        }
+
+        Option::updateOrCreate(
+            ['option_key' => 'institute.branding.banners_json'],
+            [
+                'option_value' => json_encode(array_values($clean)),
+                'value_type' => 'json',
+            ]
+        );
+    }
+
+    /**
      * Update branding
      */
     public function updateBranding(Request $request)
@@ -393,11 +458,6 @@ class OptionController extends Controller
                 ['option_key' => $key],
                 ['option_value' => (string) $value, 'value_type' => 'string']
             );
-        }
-
-        // Flush the cached options map so subsequent reads see the new values.
-        if (function_exists('setting_forget')) {
-            setting_forget();
         }
 
         // Handle Logo Upload
@@ -420,24 +480,105 @@ class OptionController extends Controller
             );
         }
 
-        // Handle Banner Upload
-        if ($request->hasFile('banner')) {
-            $oldOption = Option::where('option_key', 'institute.branding.banner_json')->first();
-            if ($oldOption) {
-                $oldData = json_decode($oldOption->option_value, true);
-                if (is_array($oldData) && isset($oldData['path'])) {
-                    Storage::disk('public')->delete($oldData['path']);
+        // Handle Banners (multiple, with active selection)
+        $banners = $this->getBanners();
+
+        // Update existing / mark-for-deletion
+        if ($request->has('existing_banners')) {
+            $existing = $request->input('existing_banners', []);
+            foreach ($existing as $id => $row) {
+                $id = (string) $id;
+                $idx = null;
+                foreach ($banners as $i => $b) {
+                    if ((string) $b['id'] === $id) { $idx = $i; break; }
+                }
+                if ($idx === null) {
+                    continue;
+                }
+
+                if (isset($row['delete']) && (string) $row['delete'] === '1') {
+                    if (!empty($banners[$idx]['path'])) {
+                        Storage::disk('public')->delete($banners[$idx]['path']);
+                    }
+                    unset($banners[$idx]);
+                    $banners = array_values($banners);
+                    continue;
+                }
+
+                $fileKey = "existing_banners.$id.image";
+                if ($request->hasFile($fileKey)) {
+                    if (!empty($banners[$idx]['path'])) {
+                        Storage::disk('public')->delete($banners[$idx]['path']);
+                    }
+                    $path = $this->imageService->convertToWebp($request->file($fileKey), 'branding');
+                    $banners[$idx]['path'] = $path;
+                    $banners[$idx]['url']  = Storage::url($path);
                 }
             }
+        }
 
+        // Add new banners uploaded via the multi-file 'banners[]' input.
+        if ($request->hasFile('banners')) {
+            foreach ((array) $request->file('banners') as $file) {
+                if (!$file) {
+                    continue;
+                }
+                $path = $this->imageService->convertToWebp($file, 'branding');
+                $banners[] = [
+                    'id'    => (string) \Illuminate\Support\Str::uuid(),
+                    'url'   => Storage::url($path),
+                    'path'  => $path,
+                    'label' => '',
+                ];
+            }
+        }
+
+        // Add new banners added through the inline "Add Banner" UI.
+        // Each new banner carries a hidden file input named new_banners[<id>].
+        if ($request->hasFile('new_banners')) {
+            foreach ((array) $request->file('new_banners') as $id => $file) {
+                if (!$file) {
+                    continue;
+                }
+                $path = $this->imageService->convertToWebp($file, 'branding');
+                $banners[] = [
+                    'id'    => (string) $id,
+                    'url'   => Storage::url($path),
+                    'path'  => $path,
+                    'label' => '',
+                ];
+            }
+        }
+
+        // Backward-compat: a single 'banner' upload also works.
+        if ($request->hasFile('banner')) {
             $path = $this->imageService->convertToWebp($request->file('banner'), 'branding');
+            $banners[] = [
+                'id'    => (string) \Illuminate\Support\Str::uuid(),
+                'url'   => Storage::url($path),
+                'path'  => $path,
+                'label' => '',
+            ];
+        }
+
+        $this->saveBanners($banners);
+
+        // Persist active selection. Validate that the id still exists.
+        $activeId = $request->input('active_banner_id');
+        $validIds = array_column($banners, 'id');
+        if ($activeId && in_array((string) $activeId, $validIds, true)) {
             Option::updateOrCreate(
-                ['option_key' => 'institute.branding.banner_json'],
-                [
-                    'option_value' => json_encode(['url' => Storage::url($path), 'path' => $path]),
-                    'value_type' => 'json'
-                ]
+                ['option_key' => 'institute.branding.active_banner_id'],
+                ['option_value' => (string) $activeId, 'value_type' => 'string']
             );
+        } elseif (!empty($validIds)) {
+            // Default to the first available banner if none was chosen / chosen one is gone.
+            Option::updateOrCreate(
+                ['option_key' => 'institute.branding.active_banner_id'],
+                ['option_value' => (string) $validIds[0], 'value_type' => 'string']
+            );
+        } else {
+            Option::where('option_key', 'institute.branding.active_banner_id')->delete();
         }
 
         // Handle About Image Upload
@@ -458,6 +599,11 @@ class OptionController extends Controller
                     'value_type' => 'json'
                 ]
             );
+        }
+
+        // Flush the cached options map so subsequent reads see the new values.
+        if (function_exists('setting_forget')) {
+            setting_forget();
         }
 
         return redirect()->back()->with('success', 'Branding updated successfully.');
