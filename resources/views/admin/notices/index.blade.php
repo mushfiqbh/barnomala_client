@@ -46,12 +46,35 @@
                     </td>
                     <td class="px-6 py-4">
                         @if($notice->artifacts->count())
-                            <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-slate-100 text-slate-600 text-xs font-medium">
-                                <i class="fas fa-paperclip text-slate-400"></i>
-                                {{ $notice->artifacts->count() }}
-                            </span>
+                            <div class="grid grid-cols-3 gap-1.5 max-w-[140px]">
+                                @foreach($notice->artifacts->take(6) as $artifact)
+                                    @php
+                                        $ext = strtolower(pathinfo($artifact->file_name, PATHINFO_EXTENSION));
+                                        $isImage = in_array($ext, ['jpg', 'jpeg', 'png', 'gif', 'webp'], true);
+                                        $icon = 'fa-file-alt';
+                                        $iconColor = 'text-slate-500';
+                                        if ($ext === 'pdf') { $icon = 'fa-file-pdf'; $iconColor = 'text-rose-500'; }
+                                        elseif (in_array($ext, ['doc', 'docx'], true)) { $icon = 'fa-file-word'; $iconColor = 'text-sky-500'; }
+                                        elseif (in_array($ext, ['xls', 'xlsx'], true)) { $icon = 'fa-file-excel'; $iconColor = 'text-emerald-600'; }
+                                        elseif (in_array($ext, ['ppt', 'pptx'], true)) { $icon = 'fa-file-powerpoint'; $iconColor = 'text-amber-500'; }
+                                        elseif (in_array($ext, ['zip', 'rar'], true)) { $icon = 'fa-file-archive'; $iconColor = 'text-amber-600'; }
+                                    @endphp
+                                    <div class="aspect-square w-10 rounded-md bg-slate-50 border border-slate-200 flex items-center justify-center overflow-hidden" title="{{ $artifact->file_name }}">
+                                        @if($isImage)
+                                            <img src="{{ asset('storage/' . $artifact->file_path) }}" alt="" class="w-full h-full object-cover">
+                                        @else
+                                            <i class="fas {{ $icon }} {{ $iconColor }} text-base"></i>
+                                        @endif
+                                    </div>
+                                @endforeach
+                                @if($notice->artifacts->count() > 6)
+                                    <div class="aspect-square w-10 rounded-md bg-slate-100 border border-slate-200 flex items-center justify-center text-[11px] font-bold text-slate-600">
+                                        +{{ $notice->artifacts->count() - 6 }}
+                                    </div>
+                                @endif
+                            </div>
                         @else
-                            <span class="text-slate-300">-</span>
+                            <span class="text-slate-300">—</span>
                         @endif
                     </td>
                     <td class="px-6 py-4 text-right">

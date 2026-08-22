@@ -287,15 +287,28 @@
                         this.selectedFiles.push(file);
                     }
                 });
-                event.target.value = '';
+                // Sync the just-selected files back onto the actual <input type="file">
+                // so they're included in the form submission. Without this, the
+                // selectedFiles array is only used for display and nothing uploads.
+                this.syncInput();
             },
 
             removeFile(index) {
                 this.selectedFiles.splice(index, 1);
+                this.syncInput();
             },
 
             clearAttachments() {
                 this.selectedFiles = [];
+                this.syncInput();
+            },
+
+            syncInput() {
+                const input = this.$refs.attachmentsInput;
+                if (!input) return;
+                const dt = new DataTransfer();
+                this.selectedFiles.forEach(f => dt.items.add(f));
+                input.files = dt.files;
             },
 
             handleCoverImage(event) {
