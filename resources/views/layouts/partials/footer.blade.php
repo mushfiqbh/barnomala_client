@@ -73,13 +73,13 @@
 
                 <div class="mt-4 space-y-1">
                     @if($phone)
-                        <p>📞 Contact: {{ $phone }}</p>
+                        <p>Contact: {{ $phone }}</p>
                     @endif
                     @if($email)
-                        <p>📧 Email: {{ $email }}</p>
+                        <p>Email: {{ $email }}</p>
                     @endif
                     @if($address)
-                        <p>📍 Address: {{ $address }}</p>
+                        <p>Address: {{ $address }}</p>
                     @endif
                 </div>
             </div>

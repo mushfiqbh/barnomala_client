@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 
@@ -30,9 +31,17 @@ class AuthController extends Controller
 
         // 1. Verify Signature
         $secret = env('CLIENT_API_KEY');
-        
+
         if (!$secret) {
-            Log::error('SSO Error: CLIENT_API_KEY is not configured.');
+            Log::warning('SSO Error: CLIENT_API_KEY not configured. Running optimize:clear and retrying once.');
+            Artisan::call('optimize:clear');
+
+            // Reload env after clearing cached config so newly rotated secrets can be picked up.
+            $secret = env('CLIENT_API_KEY');
+        }
+
+        if (!$secret) {
+            Log::error('SSO Error: CLIENT_API_KEY is not configured after retry.');
             return response()->view('login', [
                 'title' => 'SSO Configuration Missing',
                 'message' => 'The CLIENT_API_KEY is not configured. Please contact support.',
