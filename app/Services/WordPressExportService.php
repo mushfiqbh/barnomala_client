@@ -223,17 +223,37 @@ class WordPressExportService
         return ['success' => true, 'count' => count($rows), 'data' => $rows];
     }
 
-    public function exportExamResults(): array
+    public function exportExamResults(?int $perPage = null): array
     {
-        $rows = $this->rows(
-            'SELECT r.*, c.className, g.groupName, s.sectionName, e.examName
-             FROM ct_result r
-             LEFT JOIN ct_class c ON r.resClass = c.classid
-             LEFT JOIN ct_group g ON r.resgroup = g.groupId
-             LEFT JOIN ct_section s ON r.resSec = s.sectionid
-             LEFT JOIN ct_exam e ON r.resExam = e.examid
-             ORDER BY r.resultYear DESC, r.resExam DESC, r.resClass ASC, CAST(r.resStdRoll AS UNSIGNED) ASC'
-        );
+        $query = DB::connection('wordpress')
+            ->table('ct_result as r')
+            ->leftJoin('ct_class as c', 'r.resClass', '=', 'c.classid')
+            ->leftJoin('ct_group as g', 'r.resgroup', '=', 'g.groupId')
+            ->leftJoin('ct_section as s', 'r.resSec', '=', 's.sectionid')
+            ->leftJoin('ct_exam as e', 'r.resExam', '=', 'e.examid')
+            ->orderByDesc('r.resultYear')
+            ->orderByDesc('r.resExam')
+            ->orderBy('r.resClass')
+            ->orderByRaw('CAST(r.resStdRoll AS UNSIGNED) ASC')
+            ->select('r.*', 'c.className', 'g.groupName', 's.sectionName', 'e.examName');
+
+        if ($perPage !== null) {
+            $results = $query->paginate($perPage);
+
+            return [
+                'success' => true,
+                'count' => $results->count(),
+                'data' => $results->items(),
+                'pagination' => [
+                    'current_page' => $results->currentPage(),
+                    'per_page' => $results->perPage(),
+                    'total' => $results->total(),
+                    'last_page' => $results->lastPage(),
+                ],
+            ];
+        }
+
+        $rows = $query->get()->map(static fn ($row) => (array) $row)->all();
 
         if ($rows === []) {
             return ['success' => true, 'data' => []];
