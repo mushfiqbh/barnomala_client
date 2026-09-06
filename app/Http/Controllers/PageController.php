@@ -166,8 +166,8 @@ class PageController extends Controller
     {
         $staffMembers = Staff::where('status', 'active')
             ->where(function ($query) {
-                $query->whereRaw("LOWER(COALESCE(department, '')) NOT LIKE ?", ['%incharge%'])
-                    ->whereRaw("LOWER(COALESCE(designation, '')) NOT LIKE ?", ['%incharge%']);
+                $query->whereNull('type')
+                    ->orWhere('type', '!=', 'incharge');
             })
             ->orderBy('name', 'asc')
             ->get();
@@ -190,10 +190,7 @@ class PageController extends Controller
     public function incharges(): View
     {
         $incharges = Staff::where('status', 'active')
-            ->where(function ($query) {
-                $query->whereRaw("LOWER(COALESCE(department, '')) LIKE ?", ['%incharge%'])
-                    ->orWhereRaw("LOWER(COALESCE(designation, '')) LIKE ?", ['%incharge%']);
-            })
+            ->where('type', 'incharge')
             ->orderBy('name', 'asc')
             ->get();
 

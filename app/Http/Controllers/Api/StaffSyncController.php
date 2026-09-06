@@ -33,20 +33,36 @@ class StaffSyncController extends Controller
                 }
 
                 $legacyId = $item['id'];
-                
+
                 // If body has only id, delete it
                 if (count($item) === 1) {
-                    $deleted = Staff::where('staff_code', $legacyId)->delete();
+                    $deleted = Staff::where('legacy_id', $legacyId)->delete();
                     if ($deleted) $summary['deleted']++;
                     continue;
                 }
 
-                // Map data from request to staff model attributes
+                // Map data from request to staff model attributes.
+                // `type` mirrors the Committee model and lets the public
+                // Incharges page filter on a stable column rather than
+                // fuzzy-matching department/designation strings.
+                //
+                // `legacy_id` is the stable primary identifier from the
+                // source system, so we match on that for upserts. Backfill
+                // it for rows previously imported before the column existed.
+                $staffCode = $item['staff_code'] ?? (string) $legacyId;
+
+                $existing = Staff::where('legacy_id', $legacyId)->first();
+                if (!$existing) {
+                    $existing = Staff::where('staff_code', $staffCode)->first();
+                }
+
                 $data = [
-                    'staff_code' => $item['staff_code'] ?? $legacyId,
+                    'legacy_id' => $legacyId,
+                    'staff_code' => $staffCode,
                     'name' => $item['name'] ?? 'Unknown',
                     'department' => $item['department'] ?? null,
                     'designation' => $item['designation'] ?? null,
+                    'type' => $item['type'] ?? null,
                     'gender' => $item['gender'] ?? null,
                     'date_of_birth' => $item['date_of_birth'] ?? null,
                     'phone' => $item['phone'] ?? null,
@@ -63,10 +79,11 @@ class StaffSyncController extends Controller
                     'status' => $item['status'] ?? 'active',
                 ];
 
-                Staff::updateOrCreate(
-                    ['staff_code' => $data['staff_code']],
-                    $data
-                );
+                if ($existing) {
+                    $existing->fill($data)->save();
+                } else {
+                    Staff::create($data);
+                }
                 
                 $summary['updated']++;
             }

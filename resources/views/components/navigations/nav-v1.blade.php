@@ -23,18 +23,18 @@
                 </div>
 
                 <!-- Desktop Menu -->
-                <div class="hidden md:flex items-center gap-0.5">
+                <div class="hidden md:flex flex-wrap items-center gap-y-1 gap-x-0.5">
                     @foreach ($navigationItems ?? [] as $item)
                         <!-- Single Link -->
                         @if (empty($item['children']))
-                            <a href="{{ $item['url'] }}" 
-                                    class="px-3 py-2.5 uppercase tracking-widest text-white font-semibold transition-all hover:bg-white/15 text-xs xl:text-sm">
+                            <a href="{{ $item['url'] }}"
+                                    class="px-[clamp(0.5rem,1.2vw,0.75rem)] py-2.5 uppercase tracking-widest text-white font-semibold transition-all hover:bg-white/15 text-[clamp(0.7rem,0.9vw,0.875rem)]">
                                 {{ $item['label'] }}
                             </a>
 
                         <!-- Dropdown -->
                         @else
-                            <div class="relative group px-3 py-2.5 cursor-pointer font-bold text-white transition-all hover:bg-white/15 group text-xs xl:text-sm">
+                            <div class="relative group px-[clamp(0.5rem,1.2vw,0.75rem)] py-2.5 cursor-pointer font-bold text-white transition-all hover:bg-white/15 group text-[clamp(0.7rem,0.9vw,0.875rem)]">
                                 <div class="flex items-center gap-1 uppercase tracking-widest font-semibold">
                                     <span>{{ $item['label'] }}</span>
                                     <svg class="w-3 h-3 transform group-hover:rotate-180 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
@@ -42,7 +42,7 @@
                                 <div class="absolute hidden group-hover:block top-full left-0 w-48 pt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                                     <div class="bg-white text-gray-800 shadow-2xl rounded-lg overflow-hidden border border-gray-100 transform origin-top scale-95 group-hover:scale-100 transition-all duration-300">
                                         @foreach ($item['children'] as $child)
-                                            <a href="{{ $child['url'] }}" 
+                                            <a href="{{ $child['url'] }}"
                                                     class="block px-4 py-2 hover:bg-indigo-50 hover:text-indigo-600 transition-colors border-b border-gray-50 last:border-0 text-sm">
                                                 {{ $child['label'] }}
                                             </a>
@@ -53,8 +53,8 @@
                         @endif
                     @endforeach
                     @if(!$showTopHeader)
-                        <a href="{{ $applyUrl }}" 
-                            class="px-3 py-2.5 uppercase tracking-widest text-white font-semibold transition-all hover:bg-white/15 text-xs xl:text-sm inline-flex items-center gap-1.5">
+                        <a href="{{ $applyUrl }}"
+                            class="px-[clamp(0.5rem,1.2vw,0.75rem)] py-2.5 uppercase tracking-widest text-white font-semibold transition-all hover:bg-white/15 text-[clamp(0.7rem,0.9vw,0.875rem)] inline-flex items-center gap-1.5">
                             Online Apply
                         </a>
                     @endif

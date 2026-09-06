@@ -14,10 +14,12 @@ class Staff extends Model
 
     protected $fillable = [
         'user_id',
+        'legacy_id',
         'staff_code',
         'name',
         'department',
         'designation',
+        'type',
         'gender',
         'date_of_birth',
         'phone',
