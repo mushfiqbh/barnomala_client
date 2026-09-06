@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\GallerySyncController;
 use App\Http\Controllers\Api\NewsSyncController;
 use App\Http\Controllers\Api\NoticeSyncController;
 use App\Http\Controllers\Api\OptionSyncController;
+use App\Http\Controllers\Api\PostSyncController;
 use App\Http\Controllers\Api\SpeechSyncController;
 use App\Http\Controllers\Api\StaffSyncController;
 use App\Http\Controllers\Api\TeacherSyncController;
@@ -24,6 +25,7 @@ Route::prefix('v1')->group(function () {
         Route::post('news/sync', [NewsSyncController::class, 'sync']);
         Route::post('galleries/sync', [GallerySyncController::class, 'sync']);
         Route::post('speeches/sync', [SpeechSyncController::class, 'sync']);
+        Route::post('posts/sync', [PostSyncController::class, 'sync']);
         Route::post('transfer/all', [DataTransferController::class, 'transferAll'])->name('api.transfer.all');
     });
 
@@ -43,4 +45,10 @@ Route::prefix('v1')->group(function () {
     Route::get('news', [NewsSyncController::class, 'index']);
     Route::get('galleries', [GallerySyncController::class, 'index']);
     Route::get('speeches', [SpeechSyncController::class, 'index']);
+    Route::get('posts', [PostSyncController::class, 'index']);
+    Route::get('posts/{type}', [PostSyncController::class, 'indexByType'])
+        ->where('type', '[a-z_]+');
+    Route::get('posts/{type}/{id}', [PostSyncController::class, 'show'])
+        ->where('type', '[a-z_]+')
+        ->where('id', '[0-9]+');
 });
