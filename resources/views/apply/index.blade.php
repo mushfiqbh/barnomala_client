@@ -58,11 +58,6 @@
 
                     <h2 class="mt-6 text-xl font-black text-slate-950">{{ $card['title'] }}</h2>
                     <p class="mt-3 flex-1 text-sm leading-6 text-slate-500">{{ $card['desc'] }}</p>
-
-                    <span class="mt-6 inline-flex items-center gap-2 text-sm font-bold text-indigo-600">
-                        {{ $card['cta'] }}
-                        <i class="fas fa-arrow-right transition-transform duration-300 group-hover:translate-x-1"></i>
-                    </span>
                 </a>
             @endforeach
         </div>
@@ -70,8 +65,7 @@
         {{-- How it works --}}
         <div class="mt-16 rounded-4xl bg-white p-8 shadow-sm ring-1 ring-slate-100 sm:p-10">
             <p class="text-sm font-semibold uppercase tracking-[0.35em] text-slate-500">How it works</p>
-            <h2 class="mt-3 text-2xl font-black text-slate-950">Simple admission in 4 steps</h2>
-
+            
             <div class="mt-8 grid gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 <div class="relative">
                     <div class="flex h-10 w-10 items-center justify-center rounded-full bg-indigo-600 text-sm font-black text-white">1</div>

@@ -24,7 +24,7 @@
 @endphp
 
 <section class="py-16">
-    <div class="mx-auto max-w-4xl px-4 sm:px-6 lg:px-8">
+    <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
         {{-- Header --}}
         <div class="flex flex-wrap items-end justify-between gap-4">
             <div>
@@ -48,7 +48,7 @@
         @endif
 
         {{-- Form card --}}
-        <div class="mt-8 rounded-4xl bg-white p-6 shadow-sm ring-1 ring-slate-100 sm:p-10">
+        <div class="mt-8 rounded-4xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
             <form action="{{ route('apply.submit') }}" method="POST" enctype="multipart/form-data" id="applicationForm">
                 @csrf
 
@@ -120,7 +120,7 @@
                         </div>
                         <div id="group-field" class="{{ $showGroupField ? '' : 'apply-hidden' }}">
                             <label class="form-label" for="applying_group_id">Applying Group</label>
-                            <select id="applying_group_id" name="applying_group_id" class="form-control" {{ $showGroupField ? '' : 'disabled' }}>
+                            <select id="applying_group_id" name="applying_group_id" class="form-control highlight" {{ $showGroupField ? '' : 'disabled' }}>
                                 <option value="">Select group</option>
                                 @forelse($selectedGroupOptions as $option)
                                     <option value="{{ $option['value'] }}" @selected((string) $prefillValue('applying_group_id') === (string) $option['value'])>{{ $option['label'] }}</option>
@@ -140,10 +140,6 @@
                     @endphp
                     <div id="fourth-subject-field" class="apply-hidden" data-has-fourth-subject="{{ $selectedClassHasFourth ? '1' : '0' }}" data-selected-group="{{ $initialSelectedGroup ?? '' }}">
                         <h3 class="section-subtitle">Fourth Subject</h3>
-                        <p class="mb-3 text-sm text-slate-500" id="fourth-subject-help">
-                            Select the additional subject(s) you want to take. Options are limited to what's offered for your selected class
-                            <span id="fourth-subject-group-note" class="apply-hidden">and group</span>.
-                        </p>
                         <div id="fourth-subject-list" class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                             @foreach($initialFourthSubjects as $subject)
                                 @php
@@ -232,7 +228,7 @@
                     <div class="grid gap-5 sm:grid-cols-2">
                         <div>
                             <label class="form-label" for="present_address">Present Address</label>
-                            <textarea id="present_address" name="present_address" rows="3" class="form-control">{{ $prefillValue('present_address') }}</textarea>
+                            <textarea id="present_address" name="present_address" rows="3" required class="form-control">{{ $prefillValue('present_address') }}</textarea>
                             @error('present_address')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
                         <div>
@@ -396,9 +392,9 @@
                             @error('ssc_reg_no')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="form-label" for="previous_gpa">SSC GPA</label>
-                            <input id="previous_gpa" name="previous_gpa" type="number" step="0.01" value="{{ $prefillValue('previous_gpa') }}" class="form-control">
-                            @error('previous_gpa')<p class="error-text">{{ $message }}</p>@enderror
+                            <label class="form-label" for="ssc_gpa">SSC GPA</label>
+                            <input id="ssc_gpa" name="ssc_gpa" type="number" step="0.01" value="{{ $prefillValue('ssc_gpa') }}" class="form-control">
+                            @error('ssc_gpa')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
                     </div>
                 </div>{{-- /tab-additional --}}
@@ -464,7 +460,8 @@
             box-sizing: border-box;
         }
 
-        .form-control:required {
+        .form-control:required,
+        .form-control.highlight {
             --field-accent: #4f46e5;
         }
 
@@ -707,6 +704,20 @@
 
         .apply-hidden {
             display: none;
+        }
+
+        .apply-field-invalid {
+            border-color: #e11d48 !important;
+            border-left-color: #e11d48 !important;
+            background-color: #fff1f2 !important;
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.15);
+        }
+
+        .apply-field-invalid:focus {
+            border-color: #e11d48 !important;
+            border-left-color: #e11d48 !important;
+            background-color: #ffffff !important;
+            box-shadow: 0 0 0 3px rgba(225, 29, 72, 0.25);
         }
 
         [x-cloak] {
@@ -987,12 +998,58 @@
             tab.addEventListener('click', () => activateTab(tab.dataset.tabTarget));
         });
 
+        function validatePanel(panel) {
+            if (!panel) {
+                return true;
+            }
+
+            const requiredFields = Array.from(panel.querySelectorAll('[required]'));
+            let firstInvalid = null;
+
+            requiredFields.forEach((field) => {
+                if (field.disabled || field.type === 'hidden') {
+                    return;
+                }
+
+                const isCheckbox = field.type === 'checkbox' || field.type === 'radio';
+                const value = isCheckbox
+                    ? panel.querySelector(`input[name="${field.name}"]:checked`)
+                    : field.value;
+
+                field.classList.remove('apply-field-invalid');
+
+                if (!value || (typeof value === 'string' && value.trim() === '')) {
+                    if (!firstInvalid) {
+                        firstInvalid = field;
+                    }
+                    field.classList.add('apply-field-invalid');
+                }
+            });
+
+            if (firstInvalid) {
+                firstInvalid.reportValidity();
+                if (typeof firstInvalid.scrollIntoView === 'function') {
+                    firstInvalid.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                firstInvalid.focus({ preventScroll: true });
+                touched = true;
+                updateTabStates();
+                return false;
+            }
+
+            return true;
+        }
+
         if (nextBtn) {
-            nextBtn.addEventListener('click', () => {
+            nextBtn.addEventListener('click', (e) => {
                 const current = panels.find((panel) => panel.classList.contains('active')) || panels[0];
                 const idx = panels.indexOf(current);
                 if (idx < total - 1) {
-                    activateTab(panels[idx + 1].id);
+                    if (!validatePanel(current)) {
+                        e.preventDefault();
+                        return;
+                    }
+                    activateTab(panels[idx + 1].id, { focusFirst: true });
                 }
             });
         }

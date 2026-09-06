@@ -139,6 +139,7 @@ class ApplyController extends Controller
             'application' => $application,
             'schoolName' => Option::get('institute.branding.name', config('app.name', 'School Name')),
             'schoolAddress' => (string) Option::get('institute.contact.address', ''),
+            'photoDataUri' => $this->fetchApplicantPhotoDataUri($application),
         ])->render();
 
         $mpdf = new Mpdf([
@@ -259,7 +260,7 @@ class ApplyController extends Controller
             'facilities_availed' => $applicant['facilities_availed'] ?? null,
             'ssc_roll' => $applicant['ssc_roll'] ?? null,
             'ssc_reg_no' => $applicant['ssc_reg_no'] ?? null,
-            'previous_gpa' => $applicant['previous_gpa'] ?? null,
+            'ssc_gpa' => $applicant['ssc_gpa'] ?? null,
         ];
 
         foreach ($checkboxKeys as $key) {
@@ -317,7 +318,7 @@ class ApplyController extends Controller
             'facilities_availed' => ['nullable', 'string'],
             'ssc_roll' => ['nullable', 'string', 'max:20'],
             'ssc_reg_no' => ['nullable', 'string', 'max:20'],
-            'previous_gpa' => ['nullable', 'numeric'],
+            'ssc_gpa' => ['nullable', 'numeric'],
         ]);
 
         $schoolContext = $this->getSchoolContext();
@@ -514,6 +515,60 @@ class ApplyController extends Controller
         }
 
         return array_filter($payload, static fn ($value) => $value !== null && $value !== '');
+    }
+
+    private function fetchApplicantPhotoDataUri(?array $application): ?string
+    {
+        if (!is_array($application)) {
+            return null;
+        }
+
+        $candidates = [
+            $application['image_path'] ?? null,
+            $application['image'] ?? null,
+            $application['photo'] ?? null,
+        ];
+
+        foreach ($candidates as $raw) {
+            $value = is_string($raw) ? trim($raw) : '';
+
+            if ($value === '') {
+                continue;
+            }
+
+            if (str_starts_with($value, 'data:image/')) {
+                return $value;
+            }
+
+            $url = filter_var($value, FILTER_VALIDATE_URL)
+                ? $value
+                : 'https://cloud.barnomala.com/storage/' . ltrim($value, '/');
+
+            try {
+                $photoResponse = Http::timeout(10)->get($url);
+            } catch (\Throwable $exception) {
+                Log::warning('Applicant photo fetch failed: ' . $exception->getMessage());
+                continue;
+            }
+
+            if (!$photoResponse->successful()) {
+                continue;
+            }
+
+            $body = $photoResponse->body();
+            if (!is_string($body) || $body === '') {
+                continue;
+            }
+
+            $mime = strtolower((string) ($photoResponse->header('Content-Type') ?: ''));
+            if ($mime === '' || !str_starts_with($mime, 'image/')) {
+                $mime = 'image/jpeg';
+            }
+
+            return 'data:' . $mime . ';base64,' . base64_encode($body);
+        }
+
+        return null;
     }
 
     private function extractApiMessage($response): string
