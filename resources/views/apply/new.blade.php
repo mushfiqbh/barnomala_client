@@ -213,6 +213,18 @@
                             <input id="image" name="image" type="file" accept="image/*" class="form-control">
                             @error('image')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
+                        <div>
+                            <label class="form-label" for="religion_id">Religion *</label>
+                            <select id="religion_id" name="religion_id" required class="form-control">
+                                <option value="">Select religion</option>
+                                @forelse($formData['religionOptions'] ?? [] as $option)
+                                    <option value="{{ $option['value'] }}" @selected((string) $prefillValue('religion_id') === (string) $option['value'])>{{ $option['label'] }}</option>
+                                @empty
+                                    <option value="" disabled>No religion data loaded</option>
+                                @endforelse
+                            </select>
+                            @error('religion_id')<p class="error-text">{{ $message }}</p>@enderror
+                        </div>
                     </div>
 
                     {{-- Address --}}
@@ -324,18 +336,6 @@
                     <h3 class="section-subtitle">Additional Info</h3>
                     <div class="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         <div>
-                            <label class="form-label" for="religion_id">Religion *</label>
-                            <select id="religion_id" name="religion_id" required class="form-control">
-                                <option value="">Select religion</option>
-                                @forelse($formData['religionOptions'] ?? [] as $option)
-                                    <option value="{{ $option['value'] }}" @selected((string) $prefillValue('religion_id') === (string) $option['value'])>{{ $option['label'] }}</option>
-                                @empty
-                                    <option value="" disabled>No religion data loaded</option>
-                                @endforelse
-                            </select>
-                            @error('religion_id')<p class="error-text">{{ $message }}</p>@enderror
-                        </div>
-                        <div>
                             <label class="form-label" for="email">Email</label>
                             <input id="email" name="email" type="email" value="{{ $prefillValue('email') }}" class="form-control">
                             @error('email')<p class="error-text">{{ $message }}</p>@enderror
@@ -396,7 +396,7 @@
                             @error('ssc_reg_no')<p class="error-text">{{ $message }}</p>@enderror
                         </div>
                         <div>
-                            <label class="form-label" for="previous_gpa">Previous GPA</label>
+                            <label class="form-label" for="previous_gpa">SSC GPA</label>
                             <input id="previous_gpa" name="previous_gpa" type="number" step="0.01" value="{{ $prefillValue('previous_gpa') }}" class="form-control">
                             @error('previous_gpa')<p class="error-text">{{ $message }}</p>@enderror
                         </div>

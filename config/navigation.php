@@ -15,10 +15,11 @@ return [
             ['label' => 'Exam Schedule', 'route' => 'academic.exam-schedule'],
             ['label' => 'Lecturers', 'route' => 'lecturers.index'],
             ['label' => 'Teachers', 'route' => 'teachers.index'],
-            ['label' => 'Former Teachers', 'route' => 'teachers.former'],
+            ['label' => 'Incharges', 'route' => 'staff.incharges'],
             ['label' => 'Staff', 'route' => 'staff.index'],
-            ['label' => 'Former Staff', 'route' => 'staff.former'],
             ['label' => 'Committees', 'route' => 'committees.index'],
+            ['label' => 'Former Teachers', 'route' => 'teachers.former'],
+            ['label' => 'Former Staff', 'route' => 'staff.former'],
         ]],
         ['label' => 'Student', 'route' => 'teachers.index', 'children' => [
             ['label' => 'Student', 'route' => 'student.index'],

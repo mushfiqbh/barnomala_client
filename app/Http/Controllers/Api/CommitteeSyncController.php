@@ -42,10 +42,12 @@ class CommitteeSyncController extends Controller
                     continue;
                 }
 
-                // Map data from request to Committee model attributes
+                // Map data from request to Committee model attributes.
+                // The outbound payload uses `type` (see SyncCommitteeToSchoolJob),
+                // which maps to the local `type` column.
                 $data = [
                     'id' => $legacyId,
-                    'committee_type' => $item['committee_type'] ?? 'general',
+                    'type' => $item['type'] ?? $item['committee_type'] ?? 'general',
                     'name' => $item['name'] ?? 'Unknown',
                     'session' => $item['session'] ?? null,
                     'description' => $item['description'] ?? null,
@@ -59,18 +61,30 @@ class CommitteeSyncController extends Controller
                     $data
                 );
 
-                // Sync members if provided
-                if (isset($item['members']) && is_array($item['members'])) {                    
+                // Sync members if provided. Whitelist only known fillable fields
+                // so unknown payload keys (e.g. nested relations) cannot leak in.
+                if (isset($item['members']) && is_array($item['members'])) {
                     foreach ($item['members'] as $memberItem) {
                         if (!isset($memberItem['id'])) continue;
-                        
+
                         CommitteeMember::updateOrCreate(
                             ['id' => $memberItem['id']],
-                            array_merge($memberItem, ['committee_id' => $committee->id])
+                            array_intersect_key($memberItem, array_flip([
+                                'name',
+                                'designation',
+                                'father_name',
+                                'mother_name',
+                                'phone',
+                                'email',
+                                'photo',
+                                'joining_date',
+                                'leaving_date',
+                                'is_active',
+                            ])) + ['committee_id' => $committee->id]
                         );
                     }
                 }
-                
+
                 $summary['updated']++;
             }
 

@@ -165,6 +165,10 @@ class PageController extends Controller
     public function staff(): View
     {
         $staffMembers = Staff::where('status', 'active')
+            ->where(function ($query) {
+                $query->whereRaw("LOWER(COALESCE(department, '')) NOT LIKE ?", ['%incharge%'])
+                    ->whereRaw("LOWER(COALESCE(designation, '')) NOT LIKE ?", ['%incharge%']);
+            })
             ->orderBy('name', 'asc')
             ->get();
         return view('academic.staff', array_merge($this->getPublicPageData(), ['staffMembers' => $staffMembers]));
@@ -181,6 +185,19 @@ class PageController extends Controller
     public function staffDetail(Staff $staff): View
     {
         return view('academic.staff-detail', array_merge($this->getPublicPageData(), ['staff' => $staff]));
+    }
+
+    public function incharges(): View
+    {
+        $incharges = Staff::where('status', 'active')
+            ->where(function ($query) {
+                $query->whereRaw("LOWER(COALESCE(department, '')) LIKE ?", ['%incharge%'])
+                    ->orWhereRaw("LOWER(COALESCE(designation, '')) LIKE ?", ['%incharge%']);
+            })
+            ->orderBy('name', 'asc')
+            ->get();
+
+        return view('academic.incharges', array_merge($this->getPublicPageData(), ['incharges' => $incharges]));
     }
 
     public function committees(): View

@@ -106,6 +106,7 @@ Route::get('/former-teachers', [PageController::class, 'formerTeachers'])->name(
 Route::get('/teachers/{teacher}', [PageController::class, 'teacherDetail'])->name('teachers.show');
 
 Route::get('/staff', [PageController::class, 'staff'])->name('staff.index');
+Route::get('/incharges', [PageController::class, 'incharges'])->name('staff.incharges');
 Route::get('/former-staff', [PageController::class, 'formerStaff'])->name('staff.former');
 Route::get('/staff/{staff}', [PageController::class, 'staffDetail'])->name('staff.show');
 
