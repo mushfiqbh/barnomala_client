@@ -38,7 +38,7 @@
                 </div>
             </div>
             <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Active Notices</div>
-            <div class="text-3xl font-bold text-slate-800 dark:text-white">{{ \App\Models\Notice::count() }}</div>
+            <div class="text-3xl font-bold text-slate-800 dark:text-white">{{ \App\Models\Post::notices()->where('is_active', true)->count() }}</div>
             <div class="mt-3">
                 <div class="bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                     <div class="h-full rounded-full bg-linear-to-r from-indigo-500 to-purple-500" style="width: 75%"></div>
@@ -76,7 +76,7 @@
                 </div>
             </div>
             <div class="text-xs font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-1">Total News</div>
-            <div class="text-3xl font-bold text-slate-800 dark:text-white">{{ \App\Models\News::count() ?? 0 }}</div>
+            <div class="text-3xl font-bold text-slate-800 dark:text-white">{{ \App\Models\Post::news()->where('is_active', true)->count() }}</div>
             <div class="mt-3">
                 <div class="bg-slate-100 dark:bg-slate-700 rounded-full h-1.5 overflow-hidden">
                     <div class="h-full rounded-full bg-linear-to-r from-blue-500 to-cyan-500" style="width: 45%"></div>
@@ -124,7 +124,7 @@
                     <i class="fas fa-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-indigo-400 group-hover:translate-x-1 transition-all duration-200"></i>
                 </a>
                 
-                <a href="{{ route('admin.notices.create') }}" class="flex items-center p-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 border border-transparent hover:border-slate-100 dark:hover:border-slate-600 group">
+                <a href="{{ route('admin.posts.create', ['type' => 'notice']) }}" class="flex items-center p-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 border border-transparent hover:border-slate-100 dark:hover:border-slate-600 group">
                     <div class="w-10 h-10 rounded-xl bg-linear-to-br from-emerald-50 to-emerald-100 dark:from-emerald-500/20 dark:to-emerald-500/10 flex items-center justify-center text-emerald-500 group-hover:scale-110 transition-transform duration-200 mr-3">
                         <i class="fas fa-bullhorn"></i>
                     </div>
@@ -135,7 +135,7 @@
                     <i class="fas fa-chevron-right text-xs text-slate-300 dark:text-slate-600 group-hover:text-emerald-400 group-hover:translate-x-1 transition-all duration-200"></i>
                 </a>
 
-                <a href="{{ route('admin.news.create') }}" class="flex items-center p-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 border border-transparent hover:border-slate-100 dark:hover:border-slate-600 group">
+                <a href="{{ route('admin.posts.create', ['type' => 'news']) }}" class="flex items-center p-3.5 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 border border-transparent hover:border-slate-100 dark:hover:border-slate-600 group">
                     <div class="w-10 h-10 rounded-xl bg-linear-to-br from-blue-50 to-blue-100 dark:from-blue-500/20 dark:to-blue-500/10 flex items-center justify-center text-blue-500 group-hover:scale-110 transition-transform duration-200 mr-3">
                         <i class="fas fa-newspaper"></i>
                     </div>

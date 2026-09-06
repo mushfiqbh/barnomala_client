@@ -40,7 +40,7 @@ trait BuildsPublicPageData
             })->toArray();
 
             $items[] = [
-                'label' => 'Our Branches',
+                'label' => 'Branches',
                 'url' => '#',
                 'children' => $children,
             ];

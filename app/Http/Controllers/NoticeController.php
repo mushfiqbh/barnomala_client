@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BuildsPublicPageData;
-use App\Models\Notice;
+use App\Models\Post;
 use Illuminate\View\View;
 
 class NoticeController extends Controller
@@ -12,7 +12,7 @@ class NoticeController extends Controller
 
     public function index(): View
     {
-        $notices = Notice::with('artifacts')
+        $notices = Post::notices()->with('artifacts')
             ->where('is_active', true)
             ->orderBy('is_urgent', 'desc')
             ->orderBy('published_at', 'desc')
@@ -24,9 +24,9 @@ class NoticeController extends Controller
         ]));
     }
 
-    public function show(Notice $notice): View
+    public function show(Post $notice): View
     {
-        abort_unless($notice->is_active, 404);
+        abort_unless($notice->source_type === 'notice' && $notice->is_active, 404);
 
         $notice->load('artifacts');
 

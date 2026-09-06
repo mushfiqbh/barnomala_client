@@ -3,8 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Controllers\Concerns\BuildsPublicPageData;
-use App\Models\Notice;
-use App\Models\News;
+use App\Models\Post;
 use App\Models\Speech;
 use App\Models\Teacher;
 use App\Models\CommitteeMember;
@@ -19,7 +18,7 @@ class HomeController extends Controller
         $publicData = $this->getPublicPageData();
         $options = $publicData['options'];
 
-        $notices = Notice::with('artifacts')
+        $notices = Post::notices()->with('artifacts')
             ->where('is_active', true)
             ->orderBy('is_urgent', 'desc')
             ->orderBy('published_at', 'desc')
@@ -32,7 +31,7 @@ class HomeController extends Controller
             ->orderBy('column_index')
             ->get();
 
-        $featuredNews = News::where('is_active', true)
+        $featuredNews = Post::news()->where('is_active', true)
             ->orderBy('published_at', 'desc')
             ->take(3)
             ->get();
@@ -67,7 +66,7 @@ class HomeController extends Controller
 
 
         $quickLinks = [
-            ['label' => 'Students', 'icon' => 'user-graduate', 'color' => 'bg-green-600', 'url' => '/students'],
+            ['label' => 'Student', 'icon' => 'user-graduate', 'color' => 'bg-green-600', 'url' => '/student'],
             ['label' => 'Teachers', 'icon' => 'user', 'color' => 'bg-orange-500', 'url' => '/teachers'],
             ['label' => 'Attendance', 'icon' => 'check', 'color' => 'bg-blue-600', 'url' => '/attendance'],
             ['label' => 'Result', 'icon' => 'bolt', 'color' => 'bg-red-600', 'url' => '/result'],
@@ -75,7 +74,7 @@ class HomeController extends Controller
             ['label' => 'Syllabus', 'icon' => 'book', 'color' => 'bg-orange-500', 'url' => '/syllabus'],
             ['label' => 'Academic Calendar', 'icon' => 'calendar', 'color' => 'bg-blue-600', 'url' => '/academic-calendar'],
             ['label' => 'Photo Gallery', 'icon' => 'camera', 'color' => 'bg-red-600', 'url' => '/gallery'],
-            ['label' => 'Download', 'icon' => 'download', 'color' => 'bg-green-600', 'url' => '/downloads'],
+            ['label' => 'Download', 'icon' => 'download', 'color' => 'bg-green-600', 'url' => '/download'],
             ['label' => 'News', 'icon' => 'bell', 'color' => 'bg-orange-500', 'url' => '/news'],
             ['label' => 'Notice', 'icon' => 'quote-left', 'color' => 'bg-blue-600', 'url' => '/notices'],
             ['label' => 'Career', 'icon' => 'briefcase', 'color' => 'bg-red-600', 'url' => '/careers'],

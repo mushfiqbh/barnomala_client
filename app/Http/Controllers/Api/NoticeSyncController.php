@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\Notice;
-use App\Models\NoticeArtifact;
+use App\Models\Post;
+use App\Models\PostArtifact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,7 @@ class NoticeSyncController extends Controller
         
         // Preload all notices in one query (avoid N+1)
         $ids = collect($noticesData)->pluck('id')->filter()->all();
-        $existingNotices = Notice::whereIn('id', $ids)->get()->keyBy('id');
+        $existingNotices = Post::notices()->whereIn('source_id', $ids)->get()->keyBy('source_id');
 
         $summary = [
             'updated' => 0,
@@ -33,7 +33,8 @@ class NoticeSyncController extends Controller
             DB::beginTransaction();
             foreach ($noticesData as $notice) {
                 // Find existing notice by ID
-                $noticeModel = $existingNotices[$notice['id']] ?? null;
+                $sourceId = $notice['id'] ?? null;
+                $noticeModel = $existingNotices[$sourceId] ?? null;
 
                 // If only ID is provided → delete
                 if (count($notice) === 1) {
@@ -57,7 +58,11 @@ class NoticeSyncController extends Controller
                 if ($noticeModel) {
                     $noticeModel->update($data);
                 } else {
-                    $noticeModel = Notice::create($data);
+                    $noticeModel = Post::create($data + [
+                        'type' => Post::NOTICE,
+                        'source_type' => Post::NOTICE,
+                        'source_id' => $sourceId,
+                    ]);
                 }
 
                 // Sync artifacts if provided
@@ -84,25 +89,26 @@ class NoticeSyncController extends Controller
         }
     }
 
-    private function syncArtifacts(Notice $notice, array $artifacts)
+    private function syncArtifacts(Post $notice, array $artifacts)
     {
         $processedIds = [];
 
         foreach ($artifacts as $artifact) {
             // If only id is provided, delete the artifact
             if (isset($artifact['id']) && count($artifact) === 1) {
-                NoticeArtifact::where('id', $artifact['id'])
-                    ->where('notice_id', $notice->id)
+                PostArtifact::where('source_type', Post::NOTICE)
+                    ->where('source_id', $artifact['id'])
+                    ->where('post_id', $notice->id)
                     ->delete();
                 continue;
             }
 
             // Upsert artifact by id
             if (isset($artifact['id'])) {
-                $artifactModel = NoticeArtifact::updateOrCreate(
-                    ['id' => $artifact['id']],
+                $artifactModel = PostArtifact::updateOrCreate(
+                    ['source_type' => Post::NOTICE, 'source_id' => $artifact['id']],
                     [
-                        'notice_id' => $notice->id,
+                        'post_id' => $notice->id,
                         'file_path' => $artifact['file_path'] ?? null,
                         'file_name' => $artifact['file_name'] ?? null,
                         'file_type' => $artifact['file_type'] ?? null,
@@ -112,8 +118,9 @@ class NoticeSyncController extends Controller
                 $processedIds[] = $artifactModel->id;
             } else {
                 // Create new artifact without id
-                $artifactModel = NoticeArtifact::create([
-                    'notice_id' => $notice->id,
+                $artifactModel = PostArtifact::create([
+                    'post_id' => $notice->id,
+                    'source_type' => Post::NOTICE,
                     'file_path' => $artifact['file_path'] ?? null,
                     'file_name' => $artifact['file_name'] ?? null,
                     'file_type' => $artifact['file_type'] ?? null,
@@ -127,7 +134,7 @@ class NoticeSyncController extends Controller
     public function index()
     {
         $perPage = request()->get('per_page', 15);
-        $notices = Notice::with('artifacts')->orderBy('published_at', 'desc')->paginate($perPage);
+        $notices = Post::notices()->with('artifacts')->orderBy('published_at', 'desc')->paginate($perPage);
         return response()->json([
             'status' => 'success',
             'data' => $notices->items(),

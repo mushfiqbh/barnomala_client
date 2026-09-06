@@ -9,14 +9,14 @@ use App\Http\Controllers\NewsController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ApplyController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Admin\NoticeController as AdminNoticeController;
 use App\Http\Controllers\StudentController;
 use App\Http\Controllers\ResultController;
-use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\PostController as AdminPostController;
 use App\Http\Controllers\Admin\SpeechController as AdminSpeechController;
 use App\Http\Controllers\Admin\OptionController as AdminOptionController;
 use App\Http\Controllers\Admin\GalleryController as AdminGalleryController;
 use App\Http\Controllers\Admin\DataTransferController as AdminDataTransferController;
+use App\Http\Controllers\DownloadController;
 use App\Http\Controllers\RedirectToBranchController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -42,8 +42,7 @@ Route::middleware(['auth', 'verified'])->prefix('admin')->name('admin.')->group(
         return view('admin.dashboard');
     })->name('dashboard');
 
-    Route::resource('notices', AdminNoticeController::class);
-    Route::resource('news', AdminNewsController::class);
+    Route::resource('posts', AdminPostController::class)->except('show');
     Route::resource('gallery', AdminGalleryController::class);
     Route::resource('speeches', AdminSpeechController::class);
     Route::post('speeches/quick', [AdminSpeechController::class, 'storeQuick'])->name('speeches.quick');
@@ -84,7 +83,7 @@ Route::get('/class-schedule', [PageController::class, 'classSchedule'])->name('a
 Route::get('/exam-schedule', [PageController::class, 'examSchedule'])->name('academic.exam-schedule');
 
 Route::get('/tuition-fees', [PageController::class, 'tuitionFees'])->name('student.tuition-fees');
-Route::get('/students', [StudentController::class, 'index'])->name('students.index');
+Route::get('/student', [StudentController::class, 'index'])->name('student.index');
 Route::get('/student-uniform', [PageController::class, 'uniform'])->name('student.uniform');
 Route::get('/daily-activities', [PageController::class, 'activities'])->name('student.activities');
 Route::get('/mobile-banking', [PageController::class, 'mobileBanking'])->name('student.mobile-banking');
@@ -114,6 +113,7 @@ Route::get('/committees', [PageController::class, 'committees'])->name('committe
 Route::get('/committees/{committee}', [PageController::class, 'committeeDetail'])->name('committees.show');
 
 Route::get('/contact-us', [PageController::class, 'contact'])->name('contact.index');
+Route::get('/download', [DownloadController::class, 'index'])->name('download.index');
 Route::get('/apply', [ApplyController::class, 'apply'])->name('apply.index');
 Route::get('/apply/new', [ApplyController::class, 'applyNew'])->name('apply.new');
 Route::get('/apply/applications', [ApplyController::class, 'applyApplications'])->name('apply.applications');

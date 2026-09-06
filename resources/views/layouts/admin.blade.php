@@ -100,20 +100,12 @@
                 <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-0.5 sidebar-scroll">                    
                     <div class="py-2 text-xs font-semibold text-slate-500 uppercase tracking-wider px-3">Content Management</div>
                     
-                    <a href="{{ route('admin.notices.index') }}" 
-                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.notices.*') ? 'bg-white/5 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                        <div class="w-7 h-7 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.notices.*') ? 'bg-linear-to-r from-indigo-500 to-purple-500' : 'bg-slate-800/50' }} mr-3 shrink-0 transition-colors">
+                          <a href="{{ route('admin.posts.index') }}" 
+                              class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.posts.*') && request('tab') === 'notice' ? 'bg-white/5 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
+                        <div class="w-7 h-7 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.posts.*') && request('tab') === 'notice' ? 'bg-linear-to-r from-indigo-500 to-purple-500' : 'bg-slate-800/50' }} mr-3 shrink-0 transition-colors">
                             <i class="fas fa-bullhorn text-sm"></i>
                         </div>
-                        <span>Notices</span>
-                    </a>
-
-                    <a href="{{ route('admin.news.index') }}" 
-                       class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.news.*') ? 'bg-white/5 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
-                        <div class="w-7 h-7 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.news.*') ? 'bg-linear-to-r from-indigo-500 to-purple-500' : 'bg-slate-800/50' }} mr-3 shrink-0 transition-colors">
-                            <i class="fas fa-newspaper text-sm"></i>
-                        </div>
-                        <span>News</span>
+                        <span>News / Notices</span>
                     </a>
 
                     <a href="{{ route('admin.gallery.index') }}" 
@@ -124,7 +116,7 @@
                         <span>Gallery</span>
                     </a>
 
-                    <a href="{{ route('admin.speeches.index') }}" 
+                    <a href="{{ route('admin.speeches.index') }}"
                        class="flex items-center px-3 py-2.5 text-sm font-medium rounded-lg transition-all duration-200 {{ request()->routeIs('admin.speeches.*') ? 'bg-white/5 text-white' : 'text-slate-400 hover:bg-white/5 hover:text-white' }}">
                         <div class="w-7 h-7 flex items-center justify-center rounded-lg {{ request()->routeIs('admin.speeches.*') ? 'bg-linear-to-r from-indigo-500 to-purple-500' : 'bg-slate-800/50' }} mr-3 shrink-0 transition-colors">
                             <i class="fas fa-microphone-alt text-sm"></i>

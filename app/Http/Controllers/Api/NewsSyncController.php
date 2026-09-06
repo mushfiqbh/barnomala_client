@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Models\News;
-use App\Models\NewsArtifact;
+use App\Models\Post;
+use App\Models\PostArtifact;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -21,7 +21,7 @@ class NewsSyncController extends Controller
 
         // Preload all news in one query (avoid N+1)
         $ids = collect($newsData)->pluck('id')->filter()->all();
-        $existingNews = News::whereIn('id', $ids)->get()->keyBy('id');
+        $existingNews = Post::news()->whereIn('source_id', $ids)->get()->keyBy('source_id');
 
         $summary = [
             'updated' => 0,
@@ -33,7 +33,8 @@ class NewsSyncController extends Controller
             DB::beginTransaction();
             foreach ($newsData as $news) {
                 // Find existing news by ID
-                $newsModel = $existingNews[$news['id'] ?? null] ?? null;
+                $sourceId = $news['id'] ?? null;
+                $newsModel = $existingNews[$sourceId] ?? null;
 
                 // If only ID is provided → delete
                 if (count($news) === 1) {
@@ -59,7 +60,11 @@ class NewsSyncController extends Controller
                 if ($newsModel) {
                     $newsModel->update($data);
                 } else {
-                    $newsModel = News::create($data);
+                    $newsModel = Post::create($data + [
+                        'type' => Post::NEWS,
+                        'source_type' => Post::NEWS,
+                        'source_id' => $sourceId,
+                    ]);
                 }
 
                 // Sync artifacts if provided
@@ -87,25 +92,26 @@ class NewsSyncController extends Controller
         }
     }
 
-    private function syncArtifacts(News $news, array $artifacts)
+    private function syncArtifacts(Post $news, array $artifacts)
     {
         $processedIds = [];
 
         foreach ($artifacts as $artifact) {
             // If only id is provided, delete the artifact
             if (isset($artifact['id']) && count($artifact) === 1) {
-                NewsArtifact::where('id', $artifact['id'])
-                    ->where('news_id', $news->id)
+                PostArtifact::where('source_type', Post::NEWS)
+                    ->where('source_id', $artifact['id'])
+                    ->where('post_id', $news->id)
                     ->delete();
                 continue;
             }
 
             // Upsert artifact by id
             if (isset($artifact['id'])) {
-                $artifactModel = NewsArtifact::updateOrCreate(
-                    ['id' => $artifact['id']],
+                $artifactModel = PostArtifact::updateOrCreate(
+                    ['source_type' => Post::NEWS, 'source_id' => $artifact['id']],
                     [
-                        'news_id' => $news->id,
+                        'post_id' => $news->id,
                         'file_path' => $artifact['file_path'] ?? null,
                         'file_name' => $artifact['file_name'] ?? null,
                         'file_type' => $artifact['file_type'] ?? null,
@@ -115,8 +121,9 @@ class NewsSyncController extends Controller
                 $processedIds[] = $artifactModel->id;
             } else {
                 // Create new artifact without id
-                $artifactModel = NewsArtifact::create([
-                    'news_id' => $news->id,
+                $artifactModel = PostArtifact::create([
+                    'post_id' => $news->id,
+                    'source_type' => Post::NEWS,
                     'file_path' => $artifact['file_path'] ?? null,
                     'file_name' => $artifact['file_name'] ?? null,
                     'file_type' => $artifact['file_type'] ?? null,
@@ -130,7 +137,7 @@ class NewsSyncController extends Controller
     public function index()
     {
         $perPage = request()->get('per_page', 15);
-        $news = News::with('artifacts')->orderBy('published_at', 'desc')->paginate($perPage);
+        $news = Post::news()->with('artifacts')->orderBy('published_at', 'desc')->paginate($perPage);
         return response()->json([
             'status' => 'success',
             'data' => $news->items(),

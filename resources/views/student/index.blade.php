@@ -25,7 +25,7 @@
 
         <!-- Search Panel -->
         <div class="bg-white border border-slate-200 rounded-2xl p-4 shadow-sm print:hidden">
-            <form action="{{ route('students.index') }}" method="GET" class="space-y-4">
+            <form action="{{ route('student.index') }}" method="GET" class="space-y-4">
 
                 <div class="grid grid-cols-1 md:grid-cols-6 gap-3">
 

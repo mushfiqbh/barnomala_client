@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Gallery;
-use App\Models\Notice;
+use App\Models\Post;
 use App\Models\Option;
 use App\Models\Speech;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
@@ -153,9 +153,12 @@ class WebsiteDefaultsSeeder extends Seeder
         ];
 
         foreach ($samples as $sample) {
-            Notice::query()->updateOrCreate(
-                ['title' => $sample['title']],
-                $sample
+            Post::query()->updateOrCreate(
+                ['source_type' => Post::NOTICE, 'title' => $sample['title']],
+                $sample + [
+                    'type' => Post::NOTICE,
+                    'source_type' => Post::NOTICE,
+                ]
             );
         }
     }

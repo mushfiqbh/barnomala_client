@@ -3,10 +3,8 @@
 namespace App\Services;
 
 use App\Models\Gallery;
-use App\Models\News;
-use App\Models\NewsArtifact;
-use App\Models\Notice;
-use App\Models\NoticeArtifact;
+use App\Models\Post;
+use App\Models\PostArtifact;
 use App\Models\Option;
 use App\Models\Speech;
 use Illuminate\Support\Str;
@@ -407,9 +405,10 @@ class WordPressTransferService
 
                 $parsed = $this->extractContentAndMediaUrls((string) ($row->post_content ?? ''));
 
-                $notice = Notice::query()->updateOrCreate(
-                    ['legacy_id' => $legacyId],
+                $notice = Post::query()->updateOrCreate(
+                    ['source_type' => Post::NOTICE, 'legacy_id' => $legacyId],
                     [
+                        'type' => Post::NOTICE,
                         'title' => trim((string) ($row->post_title ?? '')),
                         'content' => $parsed['text'] !== '' ? $parsed['text'] : null,
                         'published_at' => $row->post_date,
@@ -431,8 +430,9 @@ class WordPressTransferService
                         continue;
                     }
 
-                    NoticeArtifact::query()->create([
-                        'notice_id' => $notice->id,
+                    PostArtifact::query()->create([
+                        'post_id' => $notice->id,
+                        'source_type' => Post::NOTICE,
                         'file_path' => $artifactData['file_path'],
                         'file_name' => $artifactData['file_name'],
                         'file_type' => $artifactData['file_type'],
@@ -488,9 +488,10 @@ class WordPressTransferService
 
                 $parsed = $this->extractContentAndMediaUrls((string) ($row->post_content ?? ''));
 
-                $news = News::query()->updateOrCreate(
-                    ['legacy_id' => $legacyId],
+                $news = Post::query()->updateOrCreate(
+                    ['source_type' => Post::NEWS, 'legacy_id' => $legacyId],
                     [
+                        'type' => Post::NEWS,
                         'title' => trim((string) ($row->post_title ?? '')),
                         'summary' => Str::limit($parsed['text'], 220, ''),
                         'content' => $parsed['text'] !== '' ? $parsed['text'] : null,
@@ -515,8 +516,9 @@ class WordPressTransferService
                         continue;
                     }
 
-                    NewsArtifact::query()->create([
-                        'news_id' => $news->id,
+                    PostArtifact::query()->create([
+                        'post_id' => $news->id,
+                        'source_type' => Post::NEWS,
                         'file_path' => $artifactData['file_path'],
                         'file_name' => $artifactData['file_name'],
                         'file_type' => $artifactData['file_type'],
@@ -841,7 +843,7 @@ class WordPressTransferService
         }
     }
 
-    private function deleteNoticeArtifacts(Notice $notice): void
+    private function deleteNoticeArtifacts(Post $notice): void
     {
         $artifacts = $notice->artifacts()->get();
         foreach ($artifacts as $artifact) {
@@ -852,7 +854,7 @@ class WordPressTransferService
         $notice->artifacts()->delete();
     }
 
-    private function deleteNewsArtifacts(News $news): void
+    private function deleteNewsArtifacts(Post $news): void
     {
         $artifacts = $news->artifacts()->get();
         foreach ($artifacts as $artifact) {
